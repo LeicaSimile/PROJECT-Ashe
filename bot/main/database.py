@@ -133,6 +133,7 @@ def add_inactive_member(guild_id, member_id):
             )
             cur.execute(query)
             conn.commit()
+            print(f"Added member ID {member_id} to Inactive_Member table.")
         except psycopg2.DatabaseError as e:
             print(e.diag.message_primary)
             conn.rollback()
@@ -147,6 +148,7 @@ def remove_inactive_member(guild_id, member_id):
             )
             cur.execute(query)
             conn.commit()
+            print(f"Removed member ID {member_id} from Inactive_Member table.")
         except psycopg2.DatabaseError as e:
             print(e.diag.message_primary)
             conn.rollback()
