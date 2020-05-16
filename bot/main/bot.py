@@ -57,22 +57,36 @@ class Bot(object):
                 return False
 
             user = message.author
-            roles = {
-                5: 533369804334039061,
-                10: 533369803965071381,
-                20: 533369912207474706,
-                30: 533369949591175169,
-                50: 573702137918390272,
-                75: 655885354401923132
-            }
             servers = {
                 533368376148361216: {
                     "roles": {
-                        5: 533369804334039061,
-                        10: 533369803965071381,
-                        20: 533369912207474706,
-                        30: 533369949591175169,
-                        50: 573702137918390272
+                        5: {
+                            "id": 533369804334039061,
+                            "message": "Congrats [mention]! You unlocked the Second Floor. Check out #thoughtful-discussion, #venting, #nsfw-chat, and more"
+                        },
+                        10: {
+                            "id": 533369803965071381
+                        ),
+                        20: {
+                            "id": 533369912207474706,
+                            "message": "Congrats [mention]! You unlocked the Test Lab. Check out #signup to become a server tester"
+                        ),
+                        30: {
+                            "id": 533369949591175169
+                        },
+                        50: {
+                            "id": 573702137918390272
+                        },
+                        69: {
+                            "id" 655885436656549898,
+                            "message": "Nice."
+                        },
+                        75: {
+                            "id": 655885354401923132
+                        },
+                        100: {
+                            "id": 655885489324294184
+                        }
                     },
                     "pics-only": {
                         #548737482108174337: f"To keep #selfies clean, only posts with pictures are allowed. Feel free to post comments in #general!",
@@ -89,8 +103,12 @@ class Bot(object):
                 },
                 662365002556243993: {
                     "roles": {
-                        5: 668184294983991316,
-                        8: 662394541202079744
+                        5: {
+                            "id": 668184294983991316
+                        },
+                        8: {
+                            "id": 662394541202079744
+                        )
                     },
                     "pics-only": {}
                 }
@@ -115,8 +133,14 @@ class Bot(object):
                     roles = servers[message.guild.id].get("roles")
                     for r in roles:
                         if level >= r:
-                            role = discord.utils.get(message.guild.roles, id=roles[r])
+                            role = discord.utils.get(message.guild.roles, id=roles[r]["id"])
                             await mentioned.add_roles(role, reason=f"User reached level {r}")
+                            
+                            to_send = roles[r].get("message")
+                            if to_send:
+                                to_send = to_send.replace("[mention]", mentioned.mention)
+                                await self.say(message.channel, to_send)
+
             else:
                 guild = message.guild
                 channel = message.channel
