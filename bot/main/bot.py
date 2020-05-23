@@ -66,11 +66,11 @@ class Bot(object):
                         },
                         10: {
                             "id": 533369803965071381
-                        ),
+                        },
                         20: {
                             "id": 533369912207474706,
                             "message": "Congrats [mention]! You unlocked the Test Lab. Check out #signup to become a server tester"
-                        ),
+                        },
                         30: {
                             "id": 533369949591175169
                         },
