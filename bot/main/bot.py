@@ -198,13 +198,18 @@ class Bot(object):
                     },
                     {
                         "role": 533369804334039061,
-                        "channel": "mod-testing",
+                        "channel": "general-chat",
                         "message": f"Congrats, {after.mention}! You unlocked the Second Floor. Check out [#thoughtful-discussion], [#venting], [#nsfw-chat], and more!"
                     },
                     {
                         "role": 533369912207474706,
                         "channel": "general-chat",
                         "message": f"Congrats, {after.mention}! You unlocked the Test Lab. Check out [#signup] to become a server tester!"
+                    },
+                    {
+                        "role": 655885436656549898,
+                        "channel": "general-chat",
+                        "message": f"{after.mention} Nice."
                     }
                 ],
                 662365002556243993: [
