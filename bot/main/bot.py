@@ -61,15 +61,13 @@ class Bot(object):
                 533368376148361216: {
                     "roles": {
                         5: {
-                            "id": 533369804334039061,
-                            "message": "Congrats [mention]! You unlocked the Second Floor. Check out #thoughtful-discussion, #venting, #nsfw-chat, and more"
+                            "id": 533369804334039061
                         },
                         10: {
                             "id": 533369803965071381
                         },
                         20: {
-                            "id": 533369912207474706,
-                            "message": "Congrats [mention]! You unlocked the Test Lab. Check out #signup to become a server tester"
+                            "id": 533369912207474706
                         },
                         30: {
                             "id": 533369949591175169
@@ -78,8 +76,7 @@ class Bot(object):
                             "id": 573702137918390272
                         },
                         69: {
-                            "id": 655885436656549898,
-                            "message": "Nice."
+                            "id": 655885436656549898
                         },
                         75: {
                             "id": 655885354401923132
@@ -135,12 +132,6 @@ class Bot(object):
                         if level >= r:
                             role = discord.utils.get(message.guild.roles, id=roles[r]["id"])
                             await mentioned.add_roles(role, reason=f"User reached level {r}")
-                            
-                            to_send = roles[r].get("message")
-                            if to_send:
-                                to_send = to_send.replace("[mention]", mentioned.mention)
-                                await self.say(message.channel, to_send)
-
             else:
                 guild = message.guild
                 channel = message.channel
@@ -199,54 +190,63 @@ class Bot(object):
     def event_member_update(self):
         async def on_member_update(before, after):
             servers = {
-                533368376148361216: {
-                    "welcome": {
+                533368376148361216: [
+                    {
                         "role": 533499454964105245,
-                        "channel": "general-chat"
+                        "channel": "general-chat",
+                        "message": f"Welcome to the server, {after.mention}! Be sure to check out [#server-guide]. If you have any questions, feel free to message a moderator or post in [#help-and-advice]."
+                    },
+                    {
+                        "role": 533369804334039061,
+                        "channel": "mod-testing",
+                        "message": f"Congrats, {after.mention}! You unlocked the Second Floor. Check out [#thoughtful-discussion], [#venting], [#nsfw-chat], and more!"
+                    },
+                    {
+                        "role": 533369912207474706,
+                        "channel": "general-chat",
+                        "message": f"Congrats, {after.mention}! You unlocked the Test Lab. Check out [#signup] to become a server tester!"
                     }
-                },
-                662365002556243993: {
-                    "welcome": {
+                ],
+                662365002556243993: [
+                    {
                         "role": 662376437168472094,
-                        "channel": "general-chat"
+                        "channel": "general-chat",
+                        "message": f"Greetings, {after.mention}. State thy intro in [#introductions] and declare thy titles in [#roles]."
                     }
-                },
-                670671037343727646: {
-                    "welcome": {
+                ],
+                670671037343727646: [
+                    {
                         "role": 670675588683399189,
-                        "channel": "general-chat"
+                        "channel": "general-chat",
+                        "message": f"Welcome to {after.guild.name}, {after.mention}! Grab some [#roles] and have fun."
                     }
-                }
+                ]
             }
 
             if after.guild.id in servers:
                 before_roles = [r.id for r in before.roles]
                 after_roles = [r.id for r in after.roles]
-                welcome_info = servers[after.guild.id]["welcome"]
-                if welcome_info["role"] not in before_roles and welcome_info["role"] in after_roles:
-                    welcome_channel = discord.utils.get(after.guild.channels, name=welcome_info["channel"])
-                    
-                    # Say welcome message
-                    welcome_message = ""
-                    if after.guild.id == 533368376148361216:
-                        guide_channel = discord.utils.get(after.guild.channels, id=675172372323762178)
-                        help_channel = discord.utils.get(after.guild.channels, id=615047779701620776)
-                        welcome_message = f"Welcome to the server, {after.mention}! Be sure to check out {guide_channel.mention}. If you have any questions, feel free to message a moderator or post in {help_channel.mention}."
-                    elif after.guild.id == 662365002556243993:
-                        intro_channel = discord.utils.get(after.guild.channels, id=662366496215007257)
-                        roles_channel = discord.utils.get(after.guild.channels, id=662365391968010260)
-                        welcome_message = f"Greetings, {after.mention}. State thy intro in {intro_channel.mention} and declare thy titles in {roles_channel.mention}."
-                    elif after.guild.id == 670671037343727646:
-                        roles_channel = discord.utils.get(after.guild.channels, name="roles")
-                        welcome_message = f"Welcome to {after.guild.name}, {after.mention}! Grab some {roles_channel.mention} and have fun."
-
-                    await self.say(welcome_channel, welcome_message)
+                for milestone in servers[after.guild.id]:
+                    if milestone["role"] in after_roles and milestone["role"] not in before_roles:
+                        output_channel = discord.utils.get(after.guild.channels, name=milestone["channel"])
+                        await self.say(output_channel, milestone["message"], context=after, parse=True)
             
             return
         
         return on_member_update
 
-    async def say(self, channel, message, context=None):
+    async def say(self, channel, message, context=None, parse=False):
+        if parse and context:
+            try:
+                message = message.replace("[server]", context.guild.name)
+                re_channels = set(re.findall(r"\[#(.+?)\]", message))
+                for c in re_channels:
+                    c_object = discord.utils.get(context.guild.channels, name=c)
+                    if c_object:
+                        message = message.replace(f"[#{c}]", c_object.mention)
+            except AttributeError:
+                pass
+
         await channel.send(content=message)
     
     def set_commands(self, *cmds):
