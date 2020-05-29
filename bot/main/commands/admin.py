@@ -355,7 +355,7 @@ class Admin(commands.Cog):
             i = 1
             for page in leaderboard_pages:
                 players = page.get("players")
-                absent_members = [f"{p.get('username')}#{p.get('discriminator')} (lv{p.get('level')})" for p in players if p.get("id") not in member_ids]
+                absent_members = [f"**{p.get('username')}**#{p.get('discriminator')} — lv{p.get('level')}" for p in players if p.get("id") not in member_ids]
                 if not absent_members:
                     continue
 
