@@ -347,11 +347,11 @@ class Admin(commands.Cog):
     async def purgeleaderboard(self, context):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
-            
+
         mee6 = mee6_py_api.API(context.guild.id)
         member_ids = [str(m.id) for m in context.guild.members]
         try:
-            leaderboard_pages = await mee6.get_all_leaderboard_pages()
+            leaderboard_pages = await mee6.levels.get_all_leaderboard_pages()
             i = 1
             for page in leaderboard_pages:
                 players = page.get("players")
