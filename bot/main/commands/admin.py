@@ -5,6 +5,7 @@ import re
 
 import discord
 from discord.ext import commands
+import mee6_py_api
 
 from main import database, settings
 from main.status import CommandStatus
@@ -46,24 +47,6 @@ async def get_inactive_members(context, progress_report=True):
     
     if progress_msg:
         await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
-    """
-    member_count = len(context.guild.members)
-    if progress_report:
-        progress_msg = await context.channel.send(f"Scanning {member_count} members for inactivity.")
-
-    for i, member in enumerate(context.guild.members):
-        if member.bot:
-            continue
-        async for msg in member.history(after=time_boundary, oldest_first=False):
-            if not msg.guild:
-                continue
-            if msg.guild.id == context.guild.id and msg.created_at < time_boundary:
-                senders.append(msg.author)
-                break
-        
-        if progress_msg:
-            await progress_msg.edit(content=f"Scanned {i}/{member_count} members for inactivity.")
-    """
     
     results = [u for u in context.guild.members if u not in senders and not u.bot]
     db_inactive_members = database.get_all_inactive_members(context.guild.id)
@@ -360,50 +343,28 @@ class Admin(commands.Cog):
 
         return CommandStatus.COMPLETED
 
-    @commands.command()
-    async def test_multiwait(self, context):
-        done = False
-
-        def check_reaction(reaction, user):
-            return reaction.message.id == report.id and user.id == context.message.author.id \
-                and str(reaction.emoji) == "✅"
-
-        async def edit_base(base_msg, embed, timeout):
-            def check_message(msg):
-                return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
-
-            try:
-                new_edit = await self.bot.client.wait_for("message", timeout=timeout, check=check_message)
-            except asyncio.TimeoutError:
-                pass
-            else:
-                if not done:
-                    embed.description = new_edit.clean_content
-                    await base_msg.edit(embed=embed)
-                    await edit_base(base_msg, embed, timeout)
-
-        preview = discord.Embed(
-            title="Message Preview",
-            description="DRY BANANA HIPPY HAT"
-        )
-        base_msg = await context.channel.send(
-            "Type new edits below.\nReact with ✅ to confirm change.", embed=preview
-        )
-        await base_msg.add_reaction("✅")
-
-        timeout = 60
-        await edit_base(base_msg, preview, timeout)
-
+    @commands.command(description="Get a list of members on the MEE6 leaderboard who are no longer on the server.")
+    async def purgeleaderboard(self, context):
+        mee6 = mee6_py_api.API(context.guild.id)
+        member_ids = [str(m.id) for m in context.guild.members]
         try:
-            reaction, user = await self.bot.client.wait_for("reaction_add", timeout=timeout, check=check_reaction)
-        except asyncio.TimeoutError:
-            await base_msg.clear_reactions()
-        else:
-            await context.channel.send("All done.")
-        finally:
-            done = True
+            leaderboard_pages = await mee6.get_all_leaderboard_pages()
+            i = 1
+            for page in leaderboard_pages:
+                players = page.get("players")
+                absent_members = [f"{p.get('username')}#{p.get('discriminator')} (lv{p.get('level')})" for p in players if p.get("id") not in member_ids]
+                if not absent_members:
+                    continue
 
-        return CommandStatus.COMPLETED
+                report = discord.Embed(
+                    title=f"MEE6 leaderboard members who left the server (p. {i})",
+                    description="\n".join(absent_members)
+                )
+                await context.channel.send(embed=report)
+                i += 1
+
+        except mee6_py_api.exceptions.HTTPRequestError:
+            await self.bot.say(context.channel, "I couldn't find this server's MEE6 leaderboard.")
 
     @commands.command(description="Shut me down :c")
     async def shutdown(self, context):

@@ -6,3 +6,4 @@ psycopg2
 pytest
 multidict
 pyyaml
+mee6-py-api
