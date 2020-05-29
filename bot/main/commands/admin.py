@@ -345,6 +345,9 @@ class Admin(commands.Cog):
 
     @commands.command(description="Get a list of members on the MEE6 leaderboard who are no longer on the server.")
     async def purgeleaderboard(self, context):
+        if not await validate_access(context, context.message.author):
+            return CommandStatus.INVALID
+            
         mee6 = mee6_py_api.API(context.guild.id)
         member_ids = [str(m.id) for m in context.guild.members]
         try:
