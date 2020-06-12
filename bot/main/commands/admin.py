@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import math
 import time
 import re
 
@@ -172,14 +173,29 @@ class Admin(commands.Cog):
             entry = f"{'**EXEMPT** ' if i.is_exempt else ''}{i.user.mention} [{i.user.display_name}]{last_notified}"
             inactive_list.append(entry)
 
-        inactive_list = "\n".join(inactive_list)
-        self.bot.logger.debug(inactive_list)
+        # Divide into separate pages if necessary
+        CHAR_LIMIT = 2048
+        char_count = len("\n".join(inactive_list))
+        pages = math.ceil((char_count * 1.0) / CHAR_LIMIT)
+        starting_line = 0
+        for p in range(1, pages):
+            ending_line = ((len(inactive_list) * 1.0) / pages) * p
+            await context.channel.send(embed=discord.Embed(
+                title="Inactive Members (2+ weeks since last message)",
+                description="\n".join(inactive_list[starting_line:ending_line])
+            ))
+
         report_embed = discord.Embed(
             title="Inactive Members (2+ weeks since last message)",
-            description=inactive_list
+            description="\n".join(inactive_list[starting_line:])
         )
         report_embed.set_footer(text="React 📧 below to notify them")
-        report = await context.channel.send(f"{context.author.mention}", embed=report_embed)
+
+        try:
+            report = await context.channel.send(f"{context.author.mention}", embed=report_embed)
+        except discord.errors.HTTPException:
+            report = await context.channel.send()
+        
         await report.add_reaction("📧")
 
         try:
