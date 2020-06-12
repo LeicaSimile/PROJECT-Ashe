@@ -179,11 +179,12 @@ class Admin(commands.Cog):
         pages = math.ceil((char_count * 1.0) / CHAR_LIMIT)
         starting_line = 0
         for p in range(1, pages):
-            ending_line = (len(inactive_list) / pages) * p
+            ending_line = math.ceil((len(inactive_list) / pages) * p)
             await context.channel.send(embed=discord.Embed(
                 title="Inactive Members (2+ weeks since last message)",
                 description="\n".join(inactive_list[starting_line:ending_line])
             ))
+            starting_line = ending_line
 
         report_embed = discord.Embed(
             title="Inactive Members (2+ weeks since last message)",
