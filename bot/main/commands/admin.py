@@ -190,11 +190,8 @@ class Admin(commands.Cog):
             description="\n".join(inactive_list[starting_line:])
         )
         report_embed.set_footer(text="React 📧 below to notify them")
-
-        try:
-            report = await context.channel.send(f"{context.author.mention}", embed=report_embed)
-        except discord.errors.HTTPException:
-            report = await context.channel.send()
+        report = await context.channel.send(f"{context.author.mention}", embed=report_embed)
+        
         
         await report.add_reaction("📧")
 
