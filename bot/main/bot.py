@@ -228,13 +228,11 @@ class Bot(object):
                 ]
             }
 
-            self.logger.info(f"Member update weewoo. ID type: {type(after.guild.id)}")
             if after.guild.id in servers:
                 before_roles = [r.id for r in before.roles]
                 after_roles = [r.id for r in after.roles]
                 for milestone in servers[after.guild.id]:
                     if milestone["role"] in after_roles and milestone["role"] not in before_roles:
-                        self.logger.info("say the message already")
                         output_channel = discord.utils.get(after.guild.channels, name=milestone["channel"])
                         await self.say(output_channel, milestone["message"], context=after, parse=True)
             
