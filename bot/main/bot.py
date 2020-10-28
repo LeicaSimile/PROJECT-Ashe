@@ -233,6 +233,7 @@ class Bot(object):
                 after_roles = [r.id for r in after.roles]
                 for milestone in servers[after.guild.id]:
                     if milestone["role"] in after_roles and milestone["role"] not in before_roles:
+                        self.logger.debug("YO")
                         output_channel = discord.utils.get(after.guild.channels, name=milestone["channel"])
                         await self.say(output_channel, milestone["message"], context=after, parse=True)
             
