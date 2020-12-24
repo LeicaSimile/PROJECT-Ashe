@@ -197,7 +197,7 @@ class Bot(object):
                     {
                         "role": 533499454964105245,
                         "channel": "general-chat",
-                        "message": f"Welcome to the server, {after.mention}! Be sure to check out [#server-guide]. If you have any questions, feel free to message a moderator or post in [#help-and-advice]."
+                        "message": f"Welcome to the server, {after.mention}! Be sure to grab a role at [#choose-roles] and check out [#server-guide]. If you have any questions, feel free to message a moderator or post in [#help-and-advice]."
                     },
                     {
                         "role": 533369804334039061,
