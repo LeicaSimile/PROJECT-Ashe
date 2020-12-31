@@ -197,12 +197,12 @@ class Bot(object):
                     {
                         "role": 533499454964105245,
                         "channel": "general-chat",
-                        "message": f"Welcome to the server, {after.mention}! Be sure to grab a role at [#choose-roles] and check out [#server-guide]. If you have any questions, feel free to message a moderator or post in [#help-and-advice]."
+                        "message": f"Welcome to the server, {after.mention}!\n- Tag your interests and unlock different areas at [#choose-roles]\n- Check out [#server-guide]\n\nIf you have any questions, feel free to message a moderator or post in [#help-and-advice]."
                     },
                     {
                         "role": 533369804334039061,
                         "channel": "general-chat",
-                        "message": f"Congrats, {after.mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#thoughtful-discussion], [#venting], [#nsfw-chat], and more!"
+                        "message": f"Congrats, {after.mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#thoughtful-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels."
                     },
                     {
                         "role": 533369912207474706,
