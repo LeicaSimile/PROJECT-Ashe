@@ -202,7 +202,7 @@ class Bot(object):
                     {
                         "role": 533369804334039061,
                         "channel": "general-chat",
-                        "message": f"Congrats, {after.mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#thoughtful-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels."
+                        "message": f"Congrats, {after.mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#serious-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels."
                     },
                     {
                         "role": 533369912207474706,
