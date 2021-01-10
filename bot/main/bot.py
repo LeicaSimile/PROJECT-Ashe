@@ -157,7 +157,11 @@ class Bot(object):
     async def say(self, channel, message, context=None, parse=False):
         if parse and context:
             try:
-                message = message.format(server=context.guild.name, channel=context.channel, mention=context.mention)
+                server = context.guild.name if context.guild else "the server"
+                channel = context.channel.name if context.channel else ""
+                mention = context.mention if context.mention else ""
+
+                message = message.format(server=server, channel=channel, mention=mention)
                 re_channels = set(re.findall(r"\[#(.+?)\]", message))
                 for c in re_channels:
                     c_object = discord.utils.get(context.guild.channels, name=c)
