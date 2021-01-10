@@ -161,7 +161,10 @@ class Bot(object):
                 channel = context.channel.name if context.channel else ""
                 mention = context.mention if context.mention else ""
 
+                self.logger.warn(f"Simon says: {server} {channel} {mention}")
+
                 message = message.format(server=server, channel=channel, mention=mention)
+                self.logger.warn(message)
                 re_channels = set(re.findall(r"\[#(.+?)\]", message))
                 for c in re_channels:
                     c_object = discord.utils.get(context.guild.channels, name=c)
