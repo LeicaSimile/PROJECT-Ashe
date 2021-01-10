@@ -166,7 +166,7 @@ class Bot(object):
             
             mention = ""
             if hasattr(context, 'mention'):
-                context.mention
+                mention = context.mention
 
             message = message.format(server=server_name, channel=channel_name, mention=mention)
             try:
