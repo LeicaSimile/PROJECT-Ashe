@@ -1,49 +1,80 @@
-"servers":
+servers:
   533368376148361216:
-    "on_message":
-      "roles":
-        5:
-          "id": 533369804334039061
-        10:
-          "id": 533369803965071381
-        20:
-          "id": 533369912207474706
-        30:
-          "id": 533369949591175169
-        40:
-          "id": 783765499246936064
-        50:
-          "id": 573702137918390272
-        69:
-          "id": 655885436656549898
-        75:
-          "id": 655885354401923132
-        100:
-          "id": 655885489324294184
-      "pics_only":
-        538110190902312976: "To keep #lets-draw clean, only posts with pictures are allowed. Discuss art in #lets-draw-discussion!"
+    on_message:
+      level_up:
+        roles:
+          5:
+            id: 533369804334039061
+          10:
+            id: 533369803965071381
+          20:
+            id: 533369912207474706
+          30:
+            id: 533369949591175169
+          40:
+            id: 783765499246936064
+          50:
+            id: 573702137918390272
+          69:
+            id: 655885436656549898
+          75:
+            id: 655885354401923132
+          100:
+            id: 655885489324294184
+      pics_only:
+        538110190902312976: "To keep #drawings-paintings clean, only posts with pictures are allowed. Discuss art in #drawings-paintings-discussion!"
 
-    "on_member_update":
-      - "role": 533499454964105245
-        "channel": "general-chat"
-        "message": "Welcome to the server, {mention}!\\n- Tag your interests and unlock different areas at [#choose-roles]\\n- Check out [#server-guide]\\n\\nIf you have any questions, feel free to message a moderator or post in [#help-and-advice]."
-      
-      - "role": 533369804334039061
-        "channel": "general-chat"
-        "message": "Congrats, {mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#thoughtful-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels."
-      
-      - "role": 533369912207474706
-          "channel": "general-chat"
-          "message": "Congrats, {mention}! You unlocked the Test Lab. Check out [#signup] to become a server tester!"
+    on_member_update:
+      roles:
+        533499454964105245:
+          name: 1
+          channel: "general-chat"
+          message: |-
+            Welcome to the server, {mention}!
+            - Tag your interests and unlock different areas at [#choose-roles]
+            - Check out [#server-guide]
+            
+            If you have any questions, feel free to message a moderator or post in [#help-and-advice].
+        
+        533369804334039061:
+          name: 5
+          channel: "general-chat"
+          message: |-
+            Congrats, {mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#thoughtful-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels.
+        
+        533369912207474706:
+          name: 20
+          channel: "general-chat"
+          message: |-
+            Congrats, {mention}! You unlocked the Test Lab. Check out [#signup] to become a server tester!
 
-      - "role": 655885436656549898
-          "channel": "general-chat",
-          "message": "{mention} Nice."
+        655885436656549898:
+          name: 69
+          channel: "general-chat"
+          message: "{mention} Nice."
 
   662365002556243993:
-    "on_message":
-      "roles":
-        5:
-          "id": 668184294983991316
-        8:
-          "id": 662394541202079744
+    on_message:
+      level_up:
+        roles:
+          5:
+            id: 668184294983991316
+          8:
+            id: 662394541202079744
+    on_member_update:
+      roles:
+        662376437168472094:
+          name: 1
+          channel: "general-chat"
+          message: |-
+            Greetings, {mention}. State thy intro in [#introductions] and declare thy titles in [#roles].
+
+  
+  670671037343727646:
+    on_member_update:
+      roles:
+        670675588683399189:
+          name: 1
+          channel: "general-chat"
+          message: |-
+            Welcome to {server}, {mention}! Grab some [#roles] and have fun.
