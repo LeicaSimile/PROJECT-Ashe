@@ -96,11 +96,11 @@ class Bot(object):
                 guild = message.guild
                 channel = message.channel
 
-                if channel.id in events["pics-only"]:
+                if channel.id in events["pics_only"]:
                     if await check_content(
                         message,
                         not message.attachments,
-                        events["pics-only"][channel.id]
+                        events["pics_only"][channel.id]
                     ):
                         return
 
