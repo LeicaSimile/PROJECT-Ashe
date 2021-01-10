@@ -156,11 +156,11 @@ class Bot(object):
 
     async def say(self, channel, message, context=None, parse=False):
         if parse and context:
-            server = "the server"
+            server_name = "the server"
             if hasattr(context, 'guild'):
                 server = context.guild.name
 
-            channel = ""
+            channel_name = ""
             if hasattr(context, 'channel'):
                 channel = context.channel.name
             
@@ -168,7 +168,7 @@ class Bot(object):
             if hasattr(context, 'mention'):
                 context.mention
 
-            message = message.format(server=server, channel=channel, mention=mention)
+            message = message.format(server=server_name, channel=channel_name, mention=mention)
             try:
                 re_channels = set(re.findall(r"\[#(.+?)\]", message))
                 for c in re_channels:
