@@ -49,7 +49,10 @@ async def get_inactive_members(context, progress_report=True):
     if progress_msg:
         await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
     
-    results = [u for u in context.guild.members if u not in senders and not u.bot]
+    results = [
+        u for u in context.guild.members
+        if u not in senders and u.joined_at < time_boundary and not u.bot
+    ]
     db_inactive_members = database.get_all_inactive_members(context.guild.id)
 
     for member in results:

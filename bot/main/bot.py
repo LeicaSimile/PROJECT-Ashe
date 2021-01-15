@@ -157,15 +157,15 @@ class Bot(object):
     async def say(self, channel, message, context=None, parse=False):
         if parse and context:
             server_name = "the server"
-            if hasattr(context, 'guild'):
+            if hasattr(context, "guild"):
                 server = context.guild.name
 
             channel_name = ""
-            if hasattr(context, 'channel'):
+            if hasattr(context, "channel"):
                 channel = context.channel.name
             
             mention = ""
-            if hasattr(context, 'mention'):
+            if hasattr(context, "mention"):
                 mention = context.mention
 
             message = message.format(server=server_name, channel=channel_name, mention=mention)

@@ -21,8 +21,6 @@ servers:
             id: 655885354401923132
           100:
             id: 655885489324294184
-      pics_only:
-        538110190902312976: "To keep #drawings-paintings clean, only posts with pictures are allowed. Discuss art in #drawings-paintings-discussion!"
 
     on_member_update:
       roles:
