@@ -40,7 +40,7 @@ servers:
           name: 5
           channel: "general-chat"
           message: |-
-            Congrats, {mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#thoughtful-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels.
+            Congrats, {mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#serious-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels.
         
         533369912207474706:
           name: 20
@@ -52,6 +52,13 @@ servers:
           name: 69
           channel: "general-chat"
           message: "{mention} Nice."
+    
+    inactivity:
+      days_threshold: 14
+      message: |-
+        Hello, you are about to be kicked for inactivity at ***{server}***. Don't worry though, you're welcome back anytime! Just message `{owner_user}#{owner_discriminator}` for an invite back.
+        
+        (If you were exempt by a moderator, please ignore this message.)
 
   662365002556243993:
     on_message:
