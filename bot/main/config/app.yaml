@@ -1,0 +1,14 @@
+constants:
+  embed:
+    title_limit: 256
+    description_limit: 2048
+    field_limit: 25
+    field_name_limit: 256
+    field_value_limit: 1024
+    footer_limit: 2048
+    author_name_limit: 256
+    total_character_limit: 6000
+
+  message:
+    content_limit: 2000
+    

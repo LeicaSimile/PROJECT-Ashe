@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands
 import mee6_py_api
 
-from main import database, settings
+from main import database, settings, utilities
 from main.status import CommandStatus
 
 URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
@@ -22,12 +22,13 @@ async def validate_access(context, user):
             user.roles
         )
 
-async def get_inactive_members(context, progress_report=True):
+async def get_inactive_members(context, config, progress_report=True):
     """Returns a list of inactive members."""
     senders = []
     inactive_members = []
     now = datetime.datetime.now()
-    time_boundary = now - datetime.timedelta(days=14)
+    days_threshold = settings.get_inactive_threshold(context.guild.id)
+    time_boundary = now - datetime.timedelta(days=days_threshold)
     progress_msg = None
 
     channel_count = len(context.guild.text_channels)
@@ -126,13 +127,15 @@ class Admin(commands.Cog):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
 
+        message = settings.get_inactive_message(context.guild.id)
+        if not message:
+            await context.channel.send("There is no inactivity message for this server.")
+            return CommandStatus.FAILED
+
         mod_role = discord.utils.find(lambda r: r.id == settings.MOD_ROLE_ID, context.guild.roles)
         if not members:
-            members = await get_inactive_members(context)
+            members = await get_inactive_members(context, self.bot.events_config)
         members = [i.user for i in members]
-        message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *(@Moderator)* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
-        if context.guild.id == 533368376148361216:  # LMF
-            message = f"Hello, you are about to be kicked for inactivity at ***{context.guild.name}***. Don't worry though, you're welcome back anytime! Just message `{context.guild.owner.name}#{context.guild.owner.discriminator}` for an invite back.\n\nIf you were exempt by a moderator, please ignore this message."
         
         await self.notify_members(context, members, message)
         return CommandStatus.COMPLETED
@@ -169,44 +172,40 @@ class Admin(commands.Cog):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
 
-        inactive_members = await get_inactive_members(context)
+        inactive_members = await get_inactive_members(context, self.bot.events_config)
         inactive_list = []
         for i in inactive_members:
             last_notified = i.last_notified.strftime(" (%b %d, %Y %Z)") if i.last_notified else ""
             entry = f"{'**EXEMPT** ' if i.is_exempt else ''}{i.user.mention} [{i.user.display_name}]{last_notified}"
             inactive_list.append(entry)
 
-        # Divide into separate pages if necessary
-        CHAR_LIMIT = 2048
-        char_count = len("\n".join(inactive_list))
-        pages = math.ceil((char_count * 1.0) / CHAR_LIMIT)
-        starting_line = 0
-        for p in range(1, pages):
-            ending_line = math.ceil((len(inactive_list) / pages) * p)
-            await context.channel.send(embed=discord.Embed(
-                title="Inactive Members (2+ weeks since last message)",
-                description="\n".join(inactive_list[starting_line:ending_line])
-            ))
-            starting_line = ending_line
+        days_threshold = settings.get_inactive_threshold(context.guild.id)
+        for embed in utilities.split_embeds(
+            title=f"Inactive Members ({days_threshold}+ days since last message)",
+            description="\n".join(inactive_list)
+        ):
+            await context.channel.send(embed)
 
         report_embed = discord.Embed(
-            title="Inactive Members (2+ weeks since last message)",
+            title=f"Inactive Members ({days_threshold}+ days since last message)",
             description="\n".join(inactive_list[starting_line:])
         )
-        report_embed.set_footer(text="React 📧 below to notify them")
+
+        inactivity_message = utilities.get_inactive_message(context.guild.id)
+        if inactivity_message:
+            report_embed.set_footer(text="React 📧 below to notify them")
         report = await context.channel.send(f"{context.author.mention}", embed=report_embed)
         
-        
-        await report.add_reaction("📧")
-
-        try:
-            reaction, user = await self.bot.client.wait_for("reaction_add", timeout=300, check=check)
-        except asyncio.TimeoutError:
-            report_embed.set_footer(text=discord.Embed.Empty)
-            await report.edit(embed=report_embed)
-            await report.clear_reactions()
-        else:
-            await self.notify_inactive_members(context, inactive_members)
+        if inactivity_message:
+            await report.add_reaction("📧")
+            try:
+                reaction, user = await self.bot.client.wait_for("reaction_add", timeout=600, check=check)
+            except asyncio.TimeoutError:
+                report_embed.set_footer(text=discord.Embed.Empty)
+                await report.edit(embed=report_embed)
+                await report.clear_reactions()
+            else:
+                await self.notify_inactive_members(context, inactive_members)
         
         return CommandStatus.COMPLETED
     
@@ -337,15 +336,17 @@ class Admin(commands.Cog):
             await context.channel.send("I can only edit messages I sent.")
             return CommandStatus.INVALID
         else:
-            preview = discord.Embed(
+            for preview in utilities.split_embeds(
                 title="Message Preview",
-                url=to_edit.jump_url,
                 description=discord.utils.escape_markdown(to_edit.content),
+                url=to_edit.jump_url,
                 timestamp=to_edit.edited_at if to_edit.edited_at else to_edit.created_at
-            )
-            await context.channel.send(content="Enter the newly edited message below.", embed=preview)
+            ):
+                await context.channel.send(embed=preview)
+            await context.channel.send(content="Enter the newly edited message below.")
+            
             try:
-                new_edit = await self.bot.client.wait_for("message", timeout=300, check=check_message)
+                new_edit = await self.bot.client.wait_for("message", timeout=900, check=check_message)
             except asyncio.TimeoutError:
                 await context.channel.send("Time's up.")
                 return CommandStatus.CANCELLED

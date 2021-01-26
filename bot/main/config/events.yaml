@@ -1,3 +1,13 @@
+default:
+  inactivity:
+    days_threshold: 14
+    include_reactions: True
+    message_enabled: True
+    message: |-
+      Hello, you've been marked as inactive on ***{server}***.
+      
+      (Do not reply here. This is an automated message and any replies will be ignored)
+
 servers:
   533368376148361216:
     on_message:
