@@ -12,7 +12,7 @@ def split_embeds(title, description, url=None, timestamp=None, delimiter="\n"):
     starting_line = 0
     for p in range(1, pages):
         ending_line = math.ceil((len(split_description) / pages) * p)
-        embeds.append(embed=discord.Embed(
+        embeds.append(discord.Embed(
             title=title,
             description=delimiter.join(split_description[starting_line:ending_line]),
             url=url,
