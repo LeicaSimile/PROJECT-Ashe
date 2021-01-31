@@ -10,7 +10,7 @@ def split_embeds(title, description, url=None, timestamp=None, delimiter="\n"):
     split_description = description.split(delimiter)
     
     starting_line = 0
-    for p in range(1, pages):
+    for p in range(1, pages + 1):
         ending_line = math.ceil((len(split_description) / pages) * p)
         embeds.append(discord.Embed(
             title=title,
