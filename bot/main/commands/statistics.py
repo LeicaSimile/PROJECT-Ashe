@@ -8,6 +8,7 @@ from discord.ext import commands
 import multidict
 from wordcloud import WordCloud
 from matplotlib.image import imread
+from spacy.lang.en.stop_words import STOP_WORDS
 
 from main.status import CommandStatus
 
@@ -18,7 +19,7 @@ def get_word_frequencies(text):
     text = re.sub(r"[^\w\s]+", "", text)
 
     for word in text.split(" "):
-        if len(word) < 3:
+        if len(word) < 3 or word in STOP_WORDS:
             continue
         val = tempDict.get(word, 0)
         tempDict[word] = val + 1
