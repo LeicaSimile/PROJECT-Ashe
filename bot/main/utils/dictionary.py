@@ -33,7 +33,7 @@ class DictionaryCache():
             self._cache[word]["requests"] += 1
             return self._cache[word]["entries"]
         
-        return None
+        return []
 
     def _check_entries(self):
         """Remove entry with least amount of requests if cache is at or over limit"""
