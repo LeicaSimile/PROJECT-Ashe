@@ -93,7 +93,7 @@ def regular_lookup(word: str):
                         entries.append(DictionaryEntry(entry))
                 except (IndexError, KeyError) as e:
                     continue
-            else:
+            elif isinstance(entry, str):
                 entries.append(entry)
 
         regular_cache.add_entries(word, entries)
