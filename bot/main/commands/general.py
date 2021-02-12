@@ -37,7 +37,7 @@ class General(commands.Cog):
                         break
 
                     is_offensive = " *(offensive)*" if entry.is_offensive else ""
-                    definitions.append(f"**{search_term} ({i}){is_offensive}**")
+                    definitions.append(f"**{search_term} ({i + 1}){is_offensive}**")
                     definitions.append("".join([
                         "*", "\n\n".join(entry.short_definitions), "*"
                     ]))

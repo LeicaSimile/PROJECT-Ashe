@@ -79,19 +79,18 @@ def regular_lookup(word: str):
 
         clean_word = re.sub(r"\s+", " ", word.strip().lower())
         for entry in res_data:
-            if re.match(
+            if not entry.get("shortdef") and entry.get("cxs"):
+                try:
+                    # Check for spelling variants
+                    for variant in regular_lookup(entry["cxs"][0]["cxtis"][0]["cxt"]):
+                        entries.append(variant)
+                except (IndexError, KeyError) as e:
+                    continue
+            elif re.match(
                     r"{word}(?:\:[\d\w]+)?$".format(word=clean_word),
                     entry.get("meta", {"id": ""})["id"],
                     re.I):
-                try:
-                    # Check for spelling variants
-                    if not entry.get("shortdef") and entry.get("cxs"):
-                        for variant in regular_lookup(entry["cxs"][0]["cxtis"][0]["cxt"]):
-                            entries.append(variant)
-                    else:
-                        entries.append(DictionaryEntry(entry))
-                except (IndexError, KeyError) as e:
-                    continue
+                entries.append(DictionaryEntry(entry))
             elif isinstance(entry, str):
                 entries.append(entry)
 
