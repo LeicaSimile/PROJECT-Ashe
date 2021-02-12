@@ -78,21 +78,31 @@ def regular_lookup(word: str):
             return None # Word not found
 
         clean_word = re.sub(r"\s+", " ", word.strip().lower())
-        for entry in res_data:
-            if not entry.get("shortdef") and entry.get("cxs"):
-                try:
-                    # Check for spelling variants
-                    for variant in regular_lookup(entry["cxs"][0]["cxtis"][0]["cxt"]):
-                        entries.append(variant)
-                except (IndexError, KeyError) as e:
-                    continue
-            elif re.match(
+        for i, entry in enumerate(res_data):
+            if re.match(
                     r"{word}(?:\:[\d\w]+)?$".format(word=clean_word),
                     entry.get("meta", {"id": ""})["id"],
                     re.I):
-                entries.append(DictionaryEntry(entry))
+                try:
+                    # Check for spelling variants
+                    if not entry.get("shortdef") and entry.get("cxs"):
+                        for variant in regular_lookup(entry["cxs"][0]["cxtis"][0]["cxt"]):
+                            entries.append(variant)
+                    else:
+                        entries.append(DictionaryEntry(entry))
+                except (IndexError, KeyError) as e:
+                    continue
             elif isinstance(entry, str):
                 entries.append(entry)
+            elif 0 < i and not entries:
+                try:
+                    # Check for spelling variants
+                    if not entry.get("shortdef") and entry.get("cxs"):
+                        for variant in entry["cxs"][0]["cxtis"]:
+                            if variant.get("cxt"):
+                                entries.append(variant["cxt"])
+                except (IndexError, KeyError) as e:
+                    continue
 
         regular_cache.add_entries(word, entries)
     

@@ -41,7 +41,6 @@ class General(commands.Cog):
                     definitions.append("".join([
                         "*", "\n\n".join(entry.short_definitions), "*"
                     ]))
-                    definitions.append("\n")
                 
                 reply.description = "\n".join(definitions)
             except AttributeError:
