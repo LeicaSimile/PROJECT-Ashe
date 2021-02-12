@@ -49,6 +49,6 @@ class General(commands.Cog):
                 suggestions = "\n".join(search_results)
                 reply.description = f"**Did you mean...**\n*{suggestions}*"
 
-            context.channel.send(embed=reply)
+            await context.channel.send(embed=reply)
         else:
             await context.channel.send(f"Couldn't find a definition for `{search_term}`.")
