@@ -94,7 +94,7 @@ def regular_lookup(word: str):
                     continue
             elif isinstance(entry, str):
                 entries.append(entry)
-            elif 0 < i and not entries:
+            elif 0 == i and not entries:
                 try:
                     # Check for spelling variants
                     if not entry.get("shortdef") and entry.get("cxs"):
