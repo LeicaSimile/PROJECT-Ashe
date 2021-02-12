@@ -78,6 +78,7 @@ def regular_lookup(word: str):
         if not res_data:
             return None # Word not found
 
+        original_found = False
         clean_word = re.sub(r"\s+", " ", word.strip().lower())
         for i, entry in enumerate(res_data):
             if isinstance(entry, str):
@@ -86,6 +87,7 @@ def regular_lookup(word: str):
                     r"{word}\W?(?:\:[\d\w]+)?$".format(word=clean_word),
                     entry.get("meta", {"id": ""})["id"],
                     re.I):
+                original_found = True
                 try:
                     # Check for spelling variants
                     if not entry.get("shortdef") and entry.get("cxs"):
@@ -106,6 +108,8 @@ def regular_lookup(word: str):
                         entries.append(DictionaryEntry(entry))
                 except (IndexError, KeyError) as e:
                     continue
+            elif not original_found:
+                entries.append(DictionaryEntry(entry))
 
         regular_cache.add_entries(word, entries)
     
