@@ -33,6 +33,7 @@ class General(commands.Cog):
             try:
                 definitions = []
                 for i, entry in enumerate(search_results):
+                    print(f"[general:36] {i} - {entry}")
                     if i > 2:
                         break
 

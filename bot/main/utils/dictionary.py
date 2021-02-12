@@ -79,6 +79,7 @@ def regular_lookup(word: str):
 
         clean_word = re.sub(r"\s+", " ", word.strip().lower())
         for entry in res_data:
+            print(f"[dictionary:82] {entry}")
             if re.match(
                     r"{word}(?:\:[\d\w]+)?$".format(word=clean_word),
                     entry.get("meta", {"id": ""})["id"],
@@ -96,5 +97,5 @@ def regular_lookup(word: str):
                 entries.append(entry)
 
         regular_cache.add_entries(word, entries)
-        
+    
     return entries
