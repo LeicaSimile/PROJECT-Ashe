@@ -1,3 +1,4 @@
+import re
 import discord
 from discord.ext import commands
 from requests.utils import requote_uri
@@ -23,7 +24,7 @@ class General(commands.Cog):
             await context.channel.send(f"Type `{context.prefix}{context.command.name} {context.command.usage}` to look up a term in the dictionary.")
             return
 
-        search_term = args[1].strip()
+        search_term = re.sub(r"\s+", " ", args[1].strip())
         search_results = utils.dictionary.regular_lookup(search_term)
 
         if search_results:
