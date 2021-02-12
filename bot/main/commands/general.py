@@ -27,9 +27,9 @@ class General(commands.Cog):
         search_results = utils.dictionary.regular_lookup(search_term)
 
         if search_results:
-            search_url = requote_uri(f"Source: {settings.DICT_REGULAR_URL}{search_term}")
+            search_url = requote_uri(f"{settings.DICT_REGULAR_URL}{search_term}")
             reply = discord.Embed(title=f'Define: "{search_term}"', url=search_url)
-            reply.set_footer(text=search_url)
+            reply.set_footer(text=f"Source: {search_url}")
             try:
                 definitions = []
                 for i, entry in enumerate(search_results):
