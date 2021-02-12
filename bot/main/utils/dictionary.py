@@ -20,11 +20,11 @@ class DictionaryCache():
         self._cache = {}
         self.limit = limit
 
-    def add_entries(word: str, entries: list):
+    def add_entries(self, word: str, entries: list):
         self._check_entries()
         self._cache[word] = {"requests": 1, "entries": entries}
 
-    def get_entries(word: str):
+    def get_entries(self, word: str):
         """Returns cached list of a given word's entries.
 
         Can be a list of DictionaryEntry objects or a list of suggested strings to search.
@@ -35,7 +35,7 @@ class DictionaryCache():
         
         return None
 
-    def _check_entries():
+    def _check_entries(self):
         """Remove entry with least amount of requests if cache is at or over limit"""
         if len(self._cache) >= self.limit:
             sorted_cache = [k for k, v in sorted(self._cache.items(), key=lambda item: item[1]["requests"])]
