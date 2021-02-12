@@ -3,7 +3,7 @@ import requests
 from main import settings
 
 class DictionaryEntry():
-    def __init__(self, data: json):
+    def __init__(self, data: dict):
         self._raw_data = data
         self.is_offensive = False
         self.short_definitions = []
