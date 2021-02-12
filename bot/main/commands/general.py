@@ -27,19 +27,20 @@ class General(commands.Cog):
         search_results = utils.dictionary.regular_lookup(search_term)
 
         if search_results:
-            search_url = requote_uri(f"{settings.DICT_REGULAR_URL}{search_term}")
-            reply = discord.Embed(title=search_term, url=search_url)
+            search_url = requote_uri(f"Source: {settings.DICT_REGULAR_URL}{search_term}")
+            reply = discord.Embed(title=f'Define: "{search_term}"', url=search_url)
             reply.set_footer(text=search_url)
             try:
                 definitions = []
                 for i, entry in enumerate(search_results):
-                    print(f"[general:36] {i} - {entry}")
                     if i > 2:
                         break
 
                     is_offensive = " *(offensive)*" if entry.is_offensive else ""
-                    definitions.append("**{search_term} ({i}){is_offensive}**")
-                    definitions.append("\n".join(entry.short_definitions))
+                    definitions.append(f"**{search_term} ({i}){is_offensive}**")
+                    definitions.append("".join([
+                        "*", "\n\n".join(entry.short_definitions), "*"
+                    ]))
                     definitions.append("\n")
                 
                 reply.description = "\n".join(definitions)
