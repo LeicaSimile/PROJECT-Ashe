@@ -15,6 +15,9 @@ IMGUR_CLIENT_SECRET = os.environ.get("IMGUR_CLIENT_SECRET")
 IMGUR_ACCESS_TOKEN = os.environ.get("IMGUR_ACCESS_TOKEN")
 IMGUR_REFRESH_TOKEN = os.environ.get("IMGUR_REFRESH_TOKEN")
 
+DICT_REGULAR_API_KEY = os.environ.get("DICT_REGULAR_API_KEY")
+DICT_ELEMENTARY_API_KEY = os.environ.get("DICT_ELEMENTARY_API_KEY")
+
 MOD_ROLE_ID = 535886249458794547
 GUILD_OWNER_ID = 533370022295502879
 
@@ -35,6 +38,14 @@ EMBED_FIELD_VALUE_LIMIT = embed_constants["field_value_limit"]
 EMBED_FOOTER_LIMIT = embed_constants["footer_limit"]
 EMBED_AUTHOR_NAME_LIMIT = embed_constants["author_name_limit"]
 EMBED_CHARACTER_LIMIT = embed_constants["total_character_limit"]
+
+dict_constants = app_config["constants"]["define"]
+DICT_REGULAR_CACHE_LIMIT = dict_constants["regular"].get("cache_limit", 1000)
+DICT_REGULAR_API_URL = dict_constants["regular"]["base_api_url"]
+DICT_REGULAR_URL = dict_constants["regular"]["base_url"]
+DICT_SIMPLE_CACHE_LIMIT = dict_constants["simple"].get("cache_limit", 1000)
+DICT_SIMPLE_API_URL = dict_constants["simple"]["base_api_url"]
+DICT_SIMPLE_URL = dict_constants["simple"]["base_url"]
 
 events_config = None
 with open(Path(__file__).parent.joinpath("config", events_config_filename), "r") as f:

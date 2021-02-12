@@ -182,6 +182,7 @@ class Bot(object):
     
     def set_commands(self, *cmds):
         self.client.add_cog(commands.Admin(self))
+        self.client.add_cog(commands.General(self))
         self.client.add_cog(commands.Statistics(self))
 
         for c in cmds:

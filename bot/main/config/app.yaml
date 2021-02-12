@@ -12,3 +12,12 @@ constants:
   message:
     content_limit: 2000
     
+  define:
+    regular:
+      cache_limit: 2000
+      base_api_url: https://dictionaryapi.com/api/v3/references/collegiate/json/
+      base_url: https://www.merriam-webster.com/dictionary/
+    simple:
+      cache_limit: 2000
+      base_api_url: https://www.dictionaryapi.com/api/v3/references/sd2/json/
+      base_url: https://www.merriam-webster.com/dictionary/
