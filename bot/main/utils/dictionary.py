@@ -90,7 +90,7 @@ def regular_lookup(word: str):
                             entries.append(variant)
                     else:
                         entries.append(DictionaryEntry(entry))
-                except IndexError, KeyError:
+                except (IndexError, KeyError) as e:
                     continue
             else:
                 entries.append(entry)
