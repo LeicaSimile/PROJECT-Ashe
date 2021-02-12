@@ -102,6 +102,8 @@ def regular_lookup(word: str):
                         for variant in entry["cxs"][0]["cxtis"]:
                             if variant.get("cxt"):
                                 entries.append(variant["cxt"])
+                    else:
+                        entries.append(DictionaryEntry(entry))
                 except (IndexError, KeyError) as e:
                     continue
 

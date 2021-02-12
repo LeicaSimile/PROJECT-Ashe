@@ -32,6 +32,7 @@ class General(commands.Cog):
             reply = discord.Embed(title=f'Define "{search_term}"', url=search_url)
             reply.set_footer(text=f"Source: {search_url}")
             try:
+                num_entries = len(search_results)
                 definitions = []
                 for i, entry in enumerate(search_results):
                     if i > 2:
@@ -39,7 +40,7 @@ class General(commands.Cog):
 
                     is_offensive = " *(offensive)*" if entry.is_offensive else ""
                     term_type = entry.term_type
-                    definitions.append(f"**{i + 1}. {search_term}** *({term_type})*{is_offensive}")
+                    definitions.append(f"**{search_term}** {i + 1}/{num_entries} *({term_type})*{is_offensive}")
                     definitions.append("".join([
                         "*", "\n\n".join(entry.short_definitions), "*"
                     ]))
