@@ -24,7 +24,7 @@ class General(commands.Cog):
             return
 
         search_term = args[1].strip()
-        search_results = utils.dict.regular_lookup(search_term)
+        search_results = utils.dictionary.regular_lookup(search_term)
 
         if search_results:
             search_url = requote_uri(f"{settings.DICT_REGULAR_URL}{search_term}")

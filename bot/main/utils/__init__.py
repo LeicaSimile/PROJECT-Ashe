@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-import dict
+from . import dictionary
