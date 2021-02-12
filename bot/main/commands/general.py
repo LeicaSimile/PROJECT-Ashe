@@ -28,7 +28,7 @@ class General(commands.Cog):
 
         if search_results:
             search_url = requote_uri(f"{settings.DICT_REGULAR_URL}{search_term}")
-            reply = discord.Embed(title=f'Define: "{search_term}"', url=search_url)
+            reply = discord.Embed(title=f'Define "{search_term}"', url=search_url)
             reply.set_footer(text=f"Source: {search_url}")
             try:
                 definitions = []
@@ -41,6 +41,7 @@ class General(commands.Cog):
                     definitions.append("".join([
                         "*", "\n\n".join(entry.short_definitions), "*"
                     ]))
+                    definitions.append("\n")
                 
                 reply.description = "\n".join(definitions)
             except AttributeError:

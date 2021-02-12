@@ -79,7 +79,9 @@ def regular_lookup(word: str):
 
         clean_word = re.sub(r"\s+", " ", word.strip().lower())
         for i, entry in enumerate(res_data):
-            if re.match(
+            if isinstance(entry, str):
+                entries.append(entry)
+            elif re.match(
                     r"{word}(?:\:[\d\w]+)?$".format(word=clean_word),
                     entry.get("meta", {"id": ""})["id"],
                     re.I):
@@ -92,8 +94,6 @@ def regular_lookup(word: str):
                         entries.append(DictionaryEntry(entry))
                 except (IndexError, KeyError) as e:
                     continue
-            elif isinstance(entry, str):
-                entries.append(entry)
             elif 0 == i and not entries:
                 try:
                     # Check for spelling variants
