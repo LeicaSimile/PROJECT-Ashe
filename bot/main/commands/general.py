@@ -38,14 +38,14 @@ class General(commands.Cog):
 
                     is_offensive = " *(offensive)*" if entry.is_offensive else ""
                     definitions.append("**{search_term} ({i}){is_offensive}**")
-                    definitions.append(entry.short_definitions.join("\n"))
+                    definitions.append("\n".join(entry.short_definitions))
                     definitions.append("\n")
                 
-                reply.description = definitions.join("\n")
+                reply.description = "\n".join(definitions)
             except AttributeError:
                 # Suggested search terms
                 reply.url = ""
-                suggestions = search_results.join("\n")
+                suggestions = "\n".join(search_results)
                 reply.description = f"**Did you mean...**\n*{suggestions}*"
 
             context.channel.send(embed=reply)
