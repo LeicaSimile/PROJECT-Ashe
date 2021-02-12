@@ -14,6 +14,7 @@ class DictionaryEntry():
     def _parse_data(self):
         self.is_offensive = self._raw_data["meta"]["offensive"]
         self.short_definitions = self._raw_data.get("shortdef")
+        self.term_type = self._raw_data.get("fl")
 
 class DictionaryCache():
     def __init__(self, limit=1000):
@@ -82,7 +83,7 @@ def regular_lookup(word: str):
             if isinstance(entry, str):
                 entries.append(entry)
             elif re.match(
-                    r"{word}(?:\:[\d\w]+)?$".format(word=clean_word),
+                    r"{word}\W?(?:\:[\d\w]+)?$".format(word=clean_word),
                     entry.get("meta", {"id": ""})["id"],
                     re.I):
                 try:
