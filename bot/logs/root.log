@@ -1,3 +1,0 @@
-[2021-Feb-19 00:43:04][WARNING: discord.client - line 231] PyNaCl is not installed, voice will NOT be supported
-[2021-Feb-19 00:43:05][WARNING: discord.state - line 703] GUILD_MEMBER_UPDATE referencing an unknown member ID: 811786396074770432. Discarding.
-[2021-Feb-19 01:18:03][WARNING: discord.client - line 231] PyNaCl is not installed, voice will NOT be supported

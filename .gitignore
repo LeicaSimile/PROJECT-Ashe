@@ -1,6 +1,7 @@
 settings.ini
 database/
 log/
+bot/logs/
 local/
 
 env/
