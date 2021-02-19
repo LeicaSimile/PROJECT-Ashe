@@ -6,9 +6,6 @@ import discord
 import yaml
 from pathlib import Path
 
-import psycopg2
-from imgurpython import ImgurClient
-
 from main import commands
 from main import database
 from main import settings
@@ -23,11 +20,8 @@ class Bot(object):
     def __init__(self, logger=None, **options):
         self.logger = logger or logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
-        self.events_config = None
-        with open(Path(__file__).parent.joinpath("config/events.yaml"), "r") as f:
-            self.events_config = yaml.safe_load(f.read())
 
-        command_prefix = ";"
+        command_prefix = settings.CMD_PREFIX
         description = settings.DESCRIPTION
         self.client = discord.ext.commands.Bot(command_prefix=command_prefix, description=description, **options)
 
@@ -39,9 +33,9 @@ class Bot(object):
 
     def event_ready(self):
         async def on_ready():
-            prefix = ";"
+            prefix = settings.CMD_PREFIX
             self.logger.info(f"{self.client.user.name} (ID: {self.client.user.id}) is now online.")
-            status = f"DDR | {prefix}help for help"
+            status = settings.DEFAULT_STATUS
             await self.client.change_presence(activity=discord.Game(name=status))
 
         return on_ready
@@ -72,7 +66,7 @@ class Bot(object):
                 finally:
                     return
 
-            servers = self.events_config["servers"]
+            servers = settings.events_config["servers"]
             if message.guild.id not in servers:
                 return
             
@@ -133,7 +127,7 @@ class Bot(object):
     
     def event_member_update(self):
         async def on_member_update(before, after):
-            servers = self.events_config["servers"]
+            servers = settings.events_config["servers"]
             if after.guild.id not in servers:
                 return
 

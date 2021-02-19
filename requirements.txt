@@ -1,8 +1,7 @@
 discord.py==1.3.4
-matplotlib==3.1.1
+matplotlib==3.3.4
 requests
 wordcloud
-imgurpython
 psycopg2
 pytest
 multidict

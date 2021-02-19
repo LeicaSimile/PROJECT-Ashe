@@ -3,31 +3,30 @@ import os
 import yaml
 from pathlib import Path
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-CLIENT_ID = os.environ.get("CLIENT_ID")
-CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
-CLIENT_TOKEN = os.environ.get("CLIENT_TOKEN")
-OWNER_ID = os.environ.get("OWNER_ID")
-DESCRIPTION = os.environ.get("DESCRIPTION")
-
-IMGUR_CLIENT_ID = os.environ.get("IMGUR_CLIENT_ID")
-IMGUR_CLIENT_SECRET = os.environ.get("IMGUR_CLIENT_SECRET")
-IMGUR_ACCESS_TOKEN = os.environ.get("IMGUR_ACCESS_TOKEN")
-IMGUR_REFRESH_TOKEN = os.environ.get("IMGUR_REFRESH_TOKEN")
-
-DICT_REGULAR_API_KEY = os.environ.get("DICT_REGULAR_API_KEY")
-DICT_ELEMENTARY_API_KEY = os.environ.get("DICT_ELEMENTARY_API_KEY")
-
-MOD_ROLE_ID = 535886249458794547
-GUILD_OWNER_ID = 533370022295502879
-
 logger = logging.getLogger("bot")
-app_config_filename = "app.yaml"
-events_config_filename = "events.yaml"
-
 app_config = None
-with open(Path(__file__).parent.joinpath("config", app_config_filename), "r") as f:
-    app_config = yaml.safe_load(f.read())
+events_config = None
+
+def load_config(filename):
+    with open(Path(__file__).parent.joinpath("config", filename), "r") as f:
+        return yaml.safe_load(f.read())
+
+def load_all():
+    app_config_filename = "app.yaml"
+    events_config_filename = "events.yaml"
+    
+    global app_config
+    global events_config
+    app_config = load_config(app_config_filename)
+    events_config = load_config(events_config_filename)
+
+# Read config files to set variables accordingly
+load_all()
+
+defaults = app_config["default"]
+CMD_PREFIX = defaults["cmd_prefix"]
+DESCRIPTION = defaults["description"]
+DEFAULT_STATUS = defaults["status"]
 
 embed_constants = app_config["constants"]["embed"]
 EMBED_TITLE_LIMIT = embed_constants["title_limit"]
@@ -43,13 +42,18 @@ dict_constants = app_config["constants"]["define"]
 DICT_REGULAR_CACHE_LIMIT = dict_constants["regular"].get("cache_limit", 1000)
 DICT_REGULAR_API_URL = dict_constants["regular"]["base_api_url"]
 DICT_REGULAR_URL = dict_constants["regular"]["base_url"]
-DICT_SIMPLE_CACHE_LIMIT = dict_constants["simple"].get("cache_limit", 1000)
-DICT_SIMPLE_API_URL = dict_constants["simple"]["base_api_url"]
-DICT_SIMPLE_URL = dict_constants["simple"]["base_url"]
 
-events_config = None
-with open(Path(__file__).parent.joinpath("config", events_config_filename), "r") as f:
-    events_config = yaml.safe_load(f.read())
+# Grab environment variables
+DATABASE_URL = os.environ.get("DATABASE_URL")
+CLIENT_ID = os.environ.get("CLIENT_ID")
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+CLIENT_TOKEN = os.environ.get("CLIENT_TOKEN")
+OWNER_ID = os.environ.get("OWNER_ID")
+
+DICT_REGULAR_API_KEY = os.environ.get("DICT_REGULAR_API_KEY")
+DICT_ELEMENTARY_API_KEY = os.environ.get("DICT_ELEMENTARY_API_KEY")
+
+MOD_ROLE_ID = 535886249458794547
 
 def get_constants():
     """Returns app constants as a Python object"""

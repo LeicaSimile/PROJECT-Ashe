@@ -18,7 +18,7 @@ async def validate_access(context, user):
     return context.guild.owner.id == user.id \
         or user.guild_permissions.administrator \
         or discord.utils.find(
-            lambda r: r.id in [settings.MOD_ROLE_ID, settings.GUILD_OWNER_ID],
+            lambda r: r.id in [settings.MOD_ROLE_ID],
             user.roles
         )
 
@@ -134,7 +134,7 @@ class Admin(commands.Cog):
 
         mod_role = discord.utils.find(lambda r: r.id == settings.MOD_ROLE_ID, context.guild.roles)
         if not members:
-            members = await get_inactive_members(context, self.bot.events_config)
+            members = await get_inactive_members(context, settings.events_config)
         members = [i.user for i in members]
         
         await self.notify_members(context, members, message)
@@ -172,7 +172,7 @@ class Admin(commands.Cog):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
 
-        inactive_members = await get_inactive_members(context, self.bot.events_config)
+        inactive_members = await get_inactive_members(context, settings.events_config)
         inactive_list = []
         for i in inactive_members:
             last_notified = i.last_notified.strftime(" (%b %d, %Y %Z)") if i.last_notified else ""

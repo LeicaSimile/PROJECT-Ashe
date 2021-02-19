@@ -1,6 +1,7 @@
 settings.ini
 database/
 log/
+local/
 
 env/
 *.pyc

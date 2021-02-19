@@ -44,7 +44,6 @@ class DictionaryCache():
 
 
 regular_cache = DictionaryCache(limit=settings.DICT_REGULAR_CACHE_LIMIT)
-simple_cache = DictionaryCache(limit=settings.DICT_SIMPLE_CACHE_LIMIT)
 format_tokens = [
     {
         "start_token": "{b}",
