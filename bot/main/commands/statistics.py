@@ -91,8 +91,3 @@ class Statistics(commands.Cog):
         await report.delete()
         await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
         return CommandStatus.COMPLETED
-
-    @commands.command(description="Summarizes a server, channel, or user's message history into a word cloud.", usage="[channel/username] (optional)")
-    async def stats(self, context):
-        pass
-        
