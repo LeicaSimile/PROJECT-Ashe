@@ -1,8 +1,14 @@
 default:
+  on_message:
+    mee6_level_up:
+      enabled: false
+      message_pattern: <@(?:.+)>.+level ([0-9]+)
+      bot_id: 159985870458322944
+
   inactivity:
     days_threshold: 14
-    include_reactions: True
-    message_enabled: True
+    include_reactions: true
+    message_enabled: true
     message: |-
       Hello, you've been marked as inactive on ***{server}***.
       
@@ -72,7 +78,7 @@ default:
 servers:
   533368376148361216:
     on_message:
-      level_up:
+      mee6_level_up:
         enabled: false
         roles:
           5:
@@ -95,33 +101,35 @@ servers:
             id: 655885489324294184
 
     on_member_update:
-      roles:
-        533499454964105245:
-          name: 1
-          channel: "general-chat"
-          message: |-
-            Welcome to the server, {mention}!
-            - Tag your interests and unlock different areas at [#choose-roles]
-            - Check out [#server-guide]
-            
-            If you have any questions, feel free to message a moderator or post in [#help-and-advice].
-        
-        533369804334039061:
-          name: 5
-          channel: "general-chat"
-          message: |-
-            Congrats, {mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#serious-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels.
-        
-        533369912207474706:
-          name: 20
-          channel: "general-chat"
-          message: |-
-            Congrats, {mention}! You unlocked the Test Lab. Check out [#signup] to become a server tester!
+      role_message:
+        enabled: false
+        roles:
+          533499454964105245:
+            name: 1
+            channel: "general-chat"
+            message: |-
+              Welcome to the server, {mention}!
+              - Tag your interests and unlock different areas at [#choose-roles]
+              - Check out [#server-guide]
+              
+              If you have any questions, feel free to message a moderator or post in [#help-and-advice].
+          
+          533369804334039061:
+            name: 5
+            channel: "general-chat"
+            message: |-
+              Congrats, {mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#serious-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels.
+          
+          533369912207474706:
+            name: 20
+            channel: "general-chat"
+            message: |-
+              Congrats, {mention}! You unlocked the Test Lab. Check out [#signup] to become a server tester!
 
-        655885436656549898:
-          name: 69
-          channel: "general-chat"
-          message: "{mention} Nice."
+          655885436656549898:
+            name: 69
+            channel: "general-chat"
+            message: "{mention} Nice."
     
     inactivity:
       days_threshold: 14
@@ -129,29 +137,3 @@ servers:
         Hello, you are about to be kicked for inactivity at ***{server}***. Don't worry though, you're welcome back anytime! Just message `{owner_user}#{owner_discriminator}` for an invite back.
         
         (If you were exempt by a moderator, please ignore this message.)
-
-  662365002556243993:
-    on_message:
-      level_up:
-        roles:
-          5:
-            id: 668184294983991316
-          8:
-            id: 662394541202079744
-    on_member_update:
-      roles:
-        662376437168472094:
-          name: 1
-          channel: "general-chat"
-          message: |-
-            Greetings, {mention}. State thy intro in [#introductions] and declare thy titles in [#roles].
-
-  
-  670671037343727646:
-    on_member_update:
-      roles:
-        670675588683399189:
-          name: 1
-          channel: "general-chat"
-          message: |-
-            Welcome to {server}, {mention}! Grab some [#roles] and have fun.

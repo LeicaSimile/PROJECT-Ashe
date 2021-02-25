@@ -3,7 +3,7 @@ default:
   description: For humanity!
   status: Testing beepboop | {prefix}help
 
-constants:
+standards:
   embed:
     title_limit: 256
     description_limit: 2048
