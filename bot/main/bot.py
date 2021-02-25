@@ -60,31 +60,30 @@ class Bot(object):
                 finally:
                     return
 
-            events = Settings.server_features(message.guild.id, "on_message")
-            if not events:
-                return
-
-            if "level_up" in events and user.id == 159985870458322944:  # MEE6 Bot
-                result = re.compile(r"<@(?:.+)>.+level ([0-9]+)").search(message.content)
+            mee6_level_up = Settings.on_message_features(message.guild.id, "mee6_level_up")
+            if mee6_level_up and mee6_level_up.get("enabled") and user.id == mee6_level_up["bot_id"]:
+                result = re.compile(r"{}".format(mee6_level_up["message_pattern"])).search(message.content)
                 if result:
                     mentioned = message.mentions[0]
                     level = int(result.group(1))
                     self.logger.info(f"{mentioned.name} reached level {level}")
 
-                    roles = events["level_up"]["roles"]
+                    roles = mee6_level_up["roles"]
                     for r in roles:
                         if level >= r:
                             role = discord.utils.get(message.guild.roles, id=roles[r]["id"])
                             await mentioned.add_roles(role, reason=f"User reached level {r}")
-            elif "pics_only" in events:
+            
+            pics_only = Settings.on_message_features(message.guild.id, "pics_only")
+            if pics_only and pics_only.get("enabled"):
                 guild = message.guild
                 channel = message.channel
 
-                if channel.id in events["pics_only"]:
+                if channel.id in pics_only["channels"]:
                     if await check_content(
                         message,
                         not message.attachments,
-                        events["pics_only"][channel.id]
+                        pics_only["channels"][channel.id]["message"]
                     ):
                         return
 
@@ -103,7 +102,6 @@ class Bot(object):
                     except AttributeError:
                         self.logger.info(f"({message.author.name}){content}")
 
-
             if before.pinned and not after.pinned:
                 log_message(after, f"<Unpinned> {after.author.display_name}: {after.content}")
             elif not before.pinned and after.pinned:
@@ -117,20 +115,16 @@ class Bot(object):
     
     def event_member_update(self):
         async def on_member_update(before, after):
-            event_settings = Settings.server_features(after.guild.id, "on_member_update")
-            if not features:
-                return
-            
-            milestones = event_settings.get("roles")
-            if not milestones:
+            milestones = Settings.on_member_update_features(after.guild.id, "role_message")
+            if not milestones or not milestones.get("enabled"):
                 return
 
             before_roles = [r.id for r in before.roles]
             after_roles = [r.id for r in after.roles]
-            for role in milestones:
+            for role in milestones["roles"]:
                 if role in after_roles and role not in before_roles:
                     output_channel = discord.utils.get(after.guild.channels, name=milestones[role]["channel"])
-                    await self.say(output_channel, milestones[role]["message"], context=after, parse=True)
+                    await self.say(output_channel, milestones["roles"][role]["message"], context=after, parse=True)
             
             return
         

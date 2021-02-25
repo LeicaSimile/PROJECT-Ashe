@@ -1,4 +1,10 @@
 default:
+  on_message:
+    mee6_level_up:
+      enabled: false
+      message_pattern: <@(?:.+)>.+level ([0-9]+)
+      bot_id: 159985870458322944
+
   inactivity:
     days_threshold: 14
     include_reactions: True
@@ -72,7 +78,7 @@ default:
 servers:
   533368376148361216:
     on_message:
-      level_up:
+      mee6_level_up:
         enabled: true
         roles:
           5:
@@ -134,26 +140,31 @@ servers:
 
   662365002556243993:
     on_message:
-      level_up:
+      mee6_level_up:
+        enabled: true
         roles:
           5:
             id: 668184294983991316
           8:
             id: 662394541202079744
     on_member_update:
-      roles:
-        662376437168472094:
-          name: 1
-          channel: "general-chat"
-          message: |-
-            Greetings, {mention}. State thy intro in [#introductions] and declare thy titles in [#roles].
+      role_message:
+        enabled: true
+        roles:
+          662376437168472094:
+            name: 1
+            channel: "general-chat"
+            message: |-
+              Greetings, {mention}. State thy intro in [#introductions] and declare thy titles in [#roles].
 
   
   670671037343727646:
     on_member_update:
-      roles:
-        670675588683399189:
-          name: 1
-          channel: "general-chat"
-          message: |-
-            Welcome to {server}, {mention}! Grab some [#roles] and have fun.
+      role_message:
+        enabled: true
+        roles:
+          670675588683399189:
+            name: 1
+            channel: "general-chat"
+            message: |-
+              Welcome to {server}, {mention}! Grab some [#roles] and have fun.

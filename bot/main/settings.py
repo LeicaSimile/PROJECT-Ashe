@@ -76,6 +76,46 @@ class Settings(object):
             values = values.get(feature)
         
         return values
+
+    @classmethod
+    def on_message_features(cls, server_id, feature):
+        default_features = cls.default_features("on_message")
+        server_features = cls.server_features(server_id, "on_message")
+        if not server_features:
+            return None
+
+        server_settings = server_features.get(feature)
+        if not server_settings:
+            return None
+        
+        # Combine default settings with server settings if not present already
+        if default_features:
+            default_settings = default_features.get(feature)
+            if default_settings:
+                for value in [v for v in default_settings if v not in server_settings]:
+                    server_settings[value] = default_settings[value]
+
+        return server_settings
+    
+    @classmethod
+    def on_member_update_features(cls, server_id, feature):
+        default_features = cls.default_features("on_member_update")
+        server_features = cls.server_features(server_id, "on_member_update")
+        if not server_features:
+            return None
+
+        server_settings = server_features.get(feature)
+        if not server_settings:
+            return None
+        
+        # Combine default settings with server settings if not present already
+        if default_features:
+            default_settings = default_features.get(feature)
+            if default_settings:
+                for value in [v for v in default_settings if v not in server_settings]:
+                    server_settings[value] = default_settings[value]
+
+        return server_settings
     
     @classmethod
     def command_settings(cls, command, server_id=None):
