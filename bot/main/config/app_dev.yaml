@@ -1,9 +1,9 @@
 default:
-  cmd_prefix: ;
+  cmd_prefix: t;
   description: For humanity!
-  status: DDR | {prefix}help
+  status: Testing beepboop | {prefix}help
 
-standards:
+constants:
   embed:
     title_limit: 256
     description_limit: 2048

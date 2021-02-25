@@ -4,111 +4,138 @@ import yaml
 from pathlib import Path
 
 logger = logging.getLogger("bot")
-app_config = None
-events_config = None
 
-def load_config(filename):
-    with open(Path(__file__).parent.joinpath("config", filename), "r") as f:
-        return yaml.safe_load(f.read())
+class Settings(object):
+    config = {}
 
-def load_all():
-    app_config_filename = "app.yaml"
-    events_config_filename = "events.yaml"
+    @staticmethod
+    def load_config(filename):
+        with open(Path(__file__).parent.joinpath("config", filename), "r") as f:
+            return yaml.safe_load(f.read())
+
+    @classmethod
+    def load_all(cls):
+        app_config_filename = ""
+        features_config_filename = ""
+
+        cls.config = {
+            "app": {},
+            "features": {},
+            "env": {
+                "environment": os.environ.get("ENVIRONMENT"),
+                "database_url": os.environ.get("DATABASE_URL"),
+                "client_id": os.environ.get("CLIENT_ID"),
+                "client_secret": os.environ.get("CLIENT_SECRET"),
+                "client_token": os.environ.get("CLIENT_TOKEN"),
+                "owner_id": os.environ.get("OWNER_ID"),
+                "dict_regular_api_key": os.environ.get("DICT_REGULAR_API_KEY"),
+            }
+        }
+
+        app_environment = cls.config["env"]["environment"]
+        if "PROD" == app_environment:
+            app_config_filename = "app.yaml"
+            features_config_filename = "features.yaml"
+        elif "DEV" == app_environment:
+            app_config_filename = "app_dev.yaml"
+            features_config_filename = "features_dev.yaml"
+
+        config["app"] = cls.load_config(app_config_filename)
+        config["features"] = cls.load_config(features_config_filename)
+
+    @classmethod
+    def app_defaults(cls, key=""):
+        values = cls.config["app"]["default"]
+        if key:
+            values = values.get(key)
+        
+        return values
+
+    @classmethod
+    def app_standards(cls, key=""):
+        values = cls.config["app"]["standards"]
+        if key:
+            values = values.get(key)
+        
+        return values
+
+    @classmethod
+    def default_features(cls, feature=""):
+        """Returns default features configuration as a Python object"""
+        values = cls.config["features"]["default"]
+        if feature:
+            values = values.get(feature)
+        
+        return values
+
+    @classmethod
+    def server_features(cls, server_id, feature=""):
+        """Returns event configuration for a given server (gives None if config doesn't exist)"""
+        values = cls.config["features"]["servers"].get(server_id)
+        if feature:
+            values = values.get(feature)
+        
+        return values
     
-    global app_config
-    global events_config
-    app_config = load_config(app_config_filename)
-    events_config = load_config(events_config_filename)
+    @classmethod
+    def command_settings(cls, command, server_id=None):
+        if server_id is not None:
+            cmd_settings = cls.server_features(server_id, "commands")
+            if cmd_settings:
+                return cmd_settings.get(command)
+
+        return cls.default_features("commands").get(command)
+
+    @classmethod
+    def inactive_threshold(cls, server_id=None):
+        """Returns the minimum amount of days for a server member to be considered inactive."""
+        if server_id:
+            server_config = cls.server_features(server_id, "inactivity")
+            if server_config:
+                try:
+                    return server_config["days_threshold"]
+                except KeyError as err:
+                    logger.debug(f"'inactivity' config for server ID {server_id} is missing a setting for 'days_threshold'. Using default setting instead.")
+        
+        try:
+            return cls.default_features("inactivity")["days_threshold"]
+        except KeyError as err:
+            logger.warn(f"Missing a default setting for 'inactivity' feature: 'days_threshold'. {err}")
+            return 14
+
+    @classmethod
+    def inactive_message(cls, server_id):
+        default_config = cls.default_features("inactivity")
+        server_config = cls.server_features(server_id, "inactivity")
+        if server_config:
+            if server_config.get("message_enabled",
+                default_config["message_enabled"]
+            ):
+                try:
+                    return server_config["message"]
+                except KeyError as err:
+                    logger.debug(f"'inactivity' config for server ID {server_id} is missing a setting for 'message'. Using default setting instead.")
+                    return default_config["message"]
+        
+        return None
+
+    @classmethod
+    def include_reactions_inactivity(cls, server_id=None):
+        if server_id:
+            server_config = cls.server_features(server_id, "inactivity")
+            if server_config:
+                try:
+                    return server_config["include_reactions"]
+                except KeyError as err:
+                    logger.debug(f"'inactivity' config for server ID {server_id} is missing a setting for 'include_reactions'. Using default setting instead.")
+        
+        try:
+            return cls.default_features("inactivity")["include_reactions"]
+        except KeyError as err:
+            logger.warn(f"{events_config_filename} is missing a default setting for 'inactivity: include_reactions'. {err}")
+        
+        return True
+
 
 # Read config files to set variables accordingly
-load_all()
-
-defaults = app_config["default"]
-CMD_PREFIX = defaults["cmd_prefix"]
-DESCRIPTION = defaults["description"]
-DEFAULT_STATUS = defaults["status"]
-
-embed_constants = app_config["constants"]["embed"]
-EMBED_TITLE_LIMIT = embed_constants["title_limit"]
-EMBED_DESCRIPTION_LIMIT = embed_constants["description_limit"]
-EMBED_FIELD_LIMIT = embed_constants["field_limit"]
-EMBED_FIELD_NAME_LIMIT = embed_constants["field_name_limit"]
-EMBED_FIELD_VALUE_LIMIT = embed_constants["field_value_limit"]
-EMBED_FOOTER_LIMIT = embed_constants["footer_limit"]
-EMBED_AUTHOR_NAME_LIMIT = embed_constants["author_name_limit"]
-EMBED_CHARACTER_LIMIT = embed_constants["total_character_limit"]
-
-dict_constants = app_config["constants"]["define"]
-DICT_REGULAR_CACHE_LIMIT = dict_constants["regular"].get("cache_limit", 1000)
-DICT_REGULAR_API_URL = dict_constants["regular"]["base_api_url"]
-DICT_REGULAR_URL = dict_constants["regular"]["base_url"]
-
-# Grab environment variables
-DATABASE_URL = os.environ.get("DATABASE_URL")
-CLIENT_ID = os.environ.get("CLIENT_ID")
-CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
-CLIENT_TOKEN = os.environ.get("CLIENT_TOKEN")
-OWNER_ID = os.environ.get("OWNER_ID")
-
-DICT_REGULAR_API_KEY = os.environ.get("DICT_REGULAR_API_KEY")
-DICT_ELEMENTARY_API_KEY = os.environ.get("DICT_ELEMENTARY_API_KEY")
-
-MOD_ROLE_ID = 535886249458794547
-
-def get_constants():
-    """Returns app constants as a Python object"""
-    return app_config["constants"]
-
-def get_default_config():
-    """Returns default event configuration as a Python object"""
-    return events_config["default"]
-
-def get_server_config(server_id):
-    """Returns event configuration for a given server (gives None if config doesn't exist)"""
-    return events_config["servers"].get(server_id)
-
-def get_inactive_threshold(server_id=None):
-    if server_id:
-        server_config = get_server_config(server_id)
-        if server_config and "inactivity" in server_config:
-            try:
-                return server_config["inactivity"]["days_threshold"]
-            except KeyError as err:
-                logger.debug(f"'inactivity' config for server ID {server_id} is missing a setting for 'days_threshold'. Using default setting instead.")
-    
-    try:
-        return get_default_config()["inactivity"]["days_threshold"]
-    except KeyError as err:
-        logger.warn(f"{events_config_filename} is missing a default setting for 'inactivity': 'days_threshold'. {err}")
-        return 14
-
-def get_inactive_message(server_id):
-    default_config = get_default_config()
-    server_config = get_server_config(server_id)
-    if server_config and "inactivity" in server_config:
-        if server_config["inactivity"].get("message_enabled",
-            default_config["inactivity"]["message_enabled"]
-        ):
-            try:
-                return server_config["inactivity"]["message"]
-            except KeyError as err:
-                logger.debug(f"'inactivity' config for server ID {server_id} is missing a setting for 'message'. Using default setting instead.")
-
-            return default_config["inactivity"]["message"]
-    
-    return None
-
-def include_reactions_inactivity(server_id=None):
-    if server_id:
-        server_config = get_server_config(server_id)
-        if server_config and "inactivity" in server_config:
-            try:
-                return server_config["inactivity"]["include_reactions"]
-            except KeyError as err:
-                logger.debug(f"'inactivity' config for server ID {server_id} is missing a setting for 'include_reactions'. Using default setting instead.")
-    
-    try:
-        return get_default_config()["inactivity"]["include_reactions"]
-    except KeyError as err:
-        logger.warn(f"{events_config_filename} is missing a default setting for 'inactivity: include_reactions'. {err}")
-        return True
+Settings.load_all()

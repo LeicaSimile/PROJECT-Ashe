@@ -1,0 +1,159 @@
+default:
+  inactivity:
+    days_threshold: 14
+    include_reactions: True
+    message_enabled: True
+    message: |-
+      Hello, you've been marked as inactive on ***{server}***.
+      
+      (Do not reply here. This is an automated message and any replies will be ignored)
+
+  commands:
+    define:
+      enabled: true
+      visible: true
+      description: Gives the definition of a term.
+      usage: "[term]"
+      cache_limit: 2000
+      base_api_url: https://dictionaryapi.com/api/v3/references/collegiate/json/
+      base_url: https://www.merriam-webster.com/dictionary/
+
+    edit:
+      enabled: true
+      visible: true
+      description: Edit a message sent through me.
+      usage: "[#channel]"
+      help: |-
+        Paste the message ID when prompted, then enter the new message.
+
+        To get the message ID, enable developer mode in Settings (Gear Icon) > Appearance > Advanced > Developer Mode.
+        
+        (PC) Hover to the right of the message and click the three vertical dots > Copy ID.
+        (Mobile) Tap and hold the message > Copy ID.
+      timeout_id_prompt: 300
+      timeout_edit: 900
+
+    exempt:
+      enabled: false
+      visible: false
+
+    message:
+      enabled: true
+      visible: true
+      description: Send a message through me.
+      usage: "[#channel/@user] [message]"
+
+    purgeleaderboard:
+      enabled: true
+      visible: true
+      description: Get a list of members on the MEE6 leaderboard who are no longer on the server.
+
+    purgelist:
+      enabled: true
+      visible: true
+      description: Shows a list of inactive members in the server.
+
+    purgenotify:
+      enabled: true
+      visible: true
+      description: Notifies all purgelist members about their inactivity.
+
+    shutdown:
+      enabled: true
+      visible: false
+      description: Shut me down :c (Bot-owner only)
+
+    wordcloud:
+      enabled: true
+      visible: true
+      description: Summarizes a server's, channel's, or user's message history into a word cloud.
+      usage: "[#channel/@username] (optional)"
+
+servers:
+  533368376148361216:
+    on_message:
+      level_up:
+        enabled: true
+        roles:
+          5:
+            id: 533369804334039061
+          10:
+            id: 533369803965071381
+          20:
+            id: 533369912207474706
+          30:
+            id: 533369949591175169
+          40:
+            id: 783765499246936064
+          50:
+            id: 573702137918390272
+          69:
+            id: 655885436656549898
+          75:
+            id: 655885354401923132
+          100:
+            id: 655885489324294184
+
+    on_member_update:
+      role_message:
+        enabled: true
+        roles:
+          533499454964105245:
+            name: 1
+            channel: "general-chat"
+            message: |-
+              Welcome to the server, {mention}!
+              - Tag your interests and unlock different areas at [#choose-roles]
+              - Check out [#server-guide]
+              
+              If you have any questions, feel free to message a moderator or post in [#help-and-advice].
+          
+          533369804334039061:
+            name: 5
+            channel: "general-chat"
+            message: |-
+              Congrats, {mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#serious-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels.
+          
+          533369912207474706:
+            name: 20
+            channel: "general-chat"
+            message: |-
+              Congrats, {mention}! You unlocked the Test Lab. Check out [#signup] to become a server tester!
+
+          655885436656549898:
+            name: 69
+            channel: "general-chat"
+            message: "{mention} Nice."
+    
+    inactivity:
+      days_threshold: 14
+      message: |-
+        Hello, you are about to be kicked for inactivity at ***{server}***. Don't worry though, you're welcome back anytime! Just message `{owner_user}#{owner_discriminator}` for an invite back.
+        
+        (If you were exempt by a moderator, please ignore this message.)
+
+  662365002556243993:
+    on_message:
+      level_up:
+        roles:
+          5:
+            id: 668184294983991316
+          8:
+            id: 662394541202079744
+    on_member_update:
+      roles:
+        662376437168472094:
+          name: 1
+          channel: "general-chat"
+          message: |-
+            Greetings, {mention}. State thy intro in [#introductions] and declare thy titles in [#roles].
+
+  
+  670671037343727646:
+    on_member_update:
+      roles:
+        670675588683399189:
+          name: 1
+          channel: "general-chat"
+          message: |-
+            Welcome to {server}, {mention}! Grab some [#roles] and have fun.

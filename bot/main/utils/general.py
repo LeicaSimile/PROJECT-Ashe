@@ -1,12 +1,12 @@
 import math
 import discord
-from main import settings
+from main.settings import Settings
 
 def split_embeds(title, description, url=None, timestamp=None, delimiter="\n"):
     """Returns a list of embeds split according to Discord character limits."""
     embeds = []
     char_count = len(description)
-    pages = math.ceil((char_count * 1.0) / settings.EMBED_DESCRIPTION_LIMIT)
+    pages = math.ceil((char_count * 1.0) / Settings.app_standards("embed")["description_limit"])
     split_description = description.split(delimiter)
     
     starting_line = 0

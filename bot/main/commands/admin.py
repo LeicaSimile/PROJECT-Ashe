@@ -8,7 +8,8 @@ import discord
 from discord.ext import commands
 import mee6_py_api
 
-from main import database, settings, utils
+from main import database, utils
+from main.settings import Settings
 from main.status import CommandStatus
 
 URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
@@ -16,18 +17,14 @@ URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|
 async def validate_access(context, user):
     """Checks if user has permission to use command."""
     return context.guild.owner.id == user.id \
-        or user.guild_permissions.administrator \
-        or discord.utils.find(
-            lambda r: r.id in [settings.MOD_ROLE_ID],
-            user.roles
-        )
+        or user.guild_permissions.administrator
 
-async def get_inactive_members(context, config, progress_report=True):
+async def get_inactive_members(context, progress_report=True):
     """Returns a list of inactive members."""
     senders = []
     inactive_members = []
     now = datetime.datetime.now()
-    days_threshold = settings.get_inactive_threshold(context.guild.id)
+    days_threshold = Settings.inactive_threshold(context.guild.id)
     time_boundary = now - datetime.timedelta(days=days_threshold)
     progress_msg = None
 
@@ -127,14 +124,13 @@ class Admin(commands.Cog):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
 
-        message = settings.get_inactive_message(context.guild.id)
+        message = Settings.get_inactive_message(context.guild.id)
         if not message:
             await context.channel.send("There is no inactivity message for this server.")
             return CommandStatus.FAILED
 
-        mod_role = discord.utils.find(lambda r: r.id == settings.MOD_ROLE_ID, context.guild.roles)
         if not members:
-            members = await get_inactive_members(context, settings.events_config)
+            members = await get_inactive_members(context)
         members = [i.user for i in members]
         
         await self.notify_members(context, members, message)
@@ -154,7 +150,7 @@ class Admin(commands.Cog):
                 warning to the user.
 
         """
-        if str(context.author.id) == settings.OWNER_ID:
+        if str(context.author.id) == Settings.config["env"]["owner_id"]:
             await function_pass(context)
         else:
             try:
@@ -172,14 +168,14 @@ class Admin(commands.Cog):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
 
-        inactive_members = await get_inactive_members(context, settings.events_config)
+        inactive_members = await get_inactive_members(context)
         inactive_list = []
         for i in inactive_members:
             last_notified = i.last_notified.strftime(" (%b %d, %Y %Z)") if i.last_notified else ""
             entry = f"{'**EXEMPT** ' if i.is_exempt else ''}{i.user.mention} [{i.user.display_name}]{last_notified}"
             inactive_list.append(entry)
 
-        days_threshold = settings.get_inactive_threshold(context.guild.id)
+        days_threshold = Settings.inactive_threshold(context.guild.id)
         for embed in utils.split_embeds(
             title=f"Inactive Members ({days_threshold}+ days since last message)",
             description="\n".join(inactive_list)

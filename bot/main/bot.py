@@ -8,34 +8,28 @@ from pathlib import Path
 
 from main import commands
 from main import database
-from main import settings
+from main.settings import Settings
 
-class Bot(object):
-    """
-    Args:
-        client (discord.Bot): The bot instance.
-        
-    """
-    
+class Bot(object):    
     def __init__(self, logger=None, **options):
         self.logger = logger or logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
 
-        command_prefix = settings.CMD_PREFIX
-        description = settings.DESCRIPTION
+        command_prefix = Settings.app_defaults("cmd_prefix")
+        description = Settings.app_defaults("description")
         self.client = discord.ext.commands.Bot(command_prefix=command_prefix, description=description, **options)
 
     def run(self):
         database.setup()
         self.set_events()
         self.set_commands()
-        self.client.run(settings.CLIENT_TOKEN, reconnect=True)
+        self.client.run(Settings.config["env"]["client_token"], reconnect=True)
 
     def event_ready(self):
         async def on_ready():
-            prefix = settings.CMD_PREFIX
+            prefix = Settings.app_defaults("cmd_prefix")
             self.logger.info(f"{self.client.user.name} (ID: {self.client.user.id}) is now online.")
-            status = settings.DEFAULT_STATUS
+            status = Settings.app_defaults("status").format(prefix=prefix)
             await self.client.change_presence(activity=discord.Game(name=status))
 
         return on_ready
@@ -66,11 +60,7 @@ class Bot(object):
                 finally:
                     return
 
-            servers = settings.events_config["servers"]
-            if message.guild.id not in servers:
-                return
-            
-            events = servers[message.guild.id].get("on_message")
+            events = Settings.server_features(message.guild.id, "on_message")
             if not events:
                 return
 
@@ -127,14 +117,12 @@ class Bot(object):
     
     def event_member_update(self):
         async def on_member_update(before, after):
-            servers = settings.events_config["servers"]
-            if after.guild.id not in servers:
+            event_settings = Settings.server_features(after.guild.id, "on_member_update")
+            if not features:
                 return
-
-            milestones = None
-            try:
-                milestones = servers[after.guild.id]["on_member_update"]["roles"]
-            except KeyError:
+            
+            milestones = event_settings.get("roles")
+            if not milestones:
                 return
 
             before_roles = [r.id for r in before.roles]

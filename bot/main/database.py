@@ -1,9 +1,9 @@
 from contextlib import contextmanager
 import psycopg2
 from psycopg2 import pool, sql
-from main import settings
+from main.settings import Settings
 
-db_pool = pool.SimpleConnectionPool(1, 10, dsn=settings.DATABASE_URL, sslmode="require")
+db_pool = pool.SimpleConnectionPool(1, 10, dsn=Settings.config["env"]["database_url"], sslmode="require")
 
 
 class InactiveMember():

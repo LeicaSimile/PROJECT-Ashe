@@ -1,6 +1,6 @@
 import re
 import requests
-from main import settings
+from main.settings import Settings
 
 class DictionaryEntry():
     def __init__(self, data: dict):
@@ -43,7 +43,7 @@ class DictionaryCache():
             self._cache.pop(sorted_cache[0], None)
 
 
-regular_cache = DictionaryCache(limit=settings.DICT_REGULAR_CACHE_LIMIT)
+regular_cache = DictionaryCache(limit=Settings.command_settings("define")["cache_limit"])
 format_tokens = [
     {
         "start_token": "{b}",
@@ -71,7 +71,9 @@ def regular_lookup(word: str):
     entries = []
     entries = regular_cache.get_entries(word)
     if not entries:
-        req_location = f"{settings.DICT_REGULAR_API_URL}{word}?key={settings.DICT_REGULAR_API_KEY}"
+        api_url = Settings.command_settings("define")["base_api_url"]
+        api_key = Settings.config["env"]["dict_regular_api_key"]
+        req_location = f"{api_url}{word}?key={api_key}"
         response = requests.get(req_location, timeout=30)
         res_data = response.json()
         if not res_data:

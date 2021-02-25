@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from requests.utils import requote_uri
 
-from main import settings
+from main.settings import Settings
 from main import utils
 
 class General(commands.Cog):
@@ -28,7 +28,8 @@ class General(commands.Cog):
         search_results = utils.dictionary.regular_lookup(search_term)
 
         if search_results:
-            search_url = requote_uri(f"{settings.DICT_REGULAR_URL}{search_term}")
+            base_url = Settings.command_settings("define")["base_url"]
+            search_url = requote_uri(f"{base_url}{search_term}")
             reply = discord.Embed(title=f'Define "{search_term}"', url=search_url)
             reply.set_footer(text=f"Source: {search_url}")
             try:

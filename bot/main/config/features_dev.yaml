@@ -8,10 +8,72 @@ default:
       
       (Do not reply here. This is an automated message and any replies will be ignored)
 
+  commands:
+    define:
+      enabled: true
+      visible: true
+      description: Gives the definition of a term.
+      usage: "[term]"
+      cache_limit: 2000
+      base_api_url: https://dictionaryapi.com/api/v3/references/collegiate/json/
+      base_url: https://www.merriam-webster.com/dictionary/
+
+    edit:
+      enabled: true
+      visible: true
+      description: Edit a message sent through me.
+      usage: "[#channel]"
+      help: |-
+        Paste the message ID when prompted, then enter the new message.
+
+        To get the message ID, enable developer mode in Settings (Gear Icon) > Appearance > Advanced > Developer Mode.
+        
+        (PC) Hover to the right of the message and click the three vertical dots > Copy ID.
+        (Mobile) Tap and hold the message > Copy ID.
+      timeout_id_prompt: 300
+      timeout_edit: 900
+
+    exempt:
+      enabled: false
+      visible: false
+
+    message:
+      enabled: true
+      visible: true
+      description: Send a message through me.
+      usage: "[#channel/@user] [message]"
+
+    purgeleaderboard:
+      enabled: true
+      visible: true
+      description: Get a list of members on the MEE6 leaderboard who are no longer on the server.
+
+    purgelist:
+      enabled: true
+      visible: true
+      description: Shows a list of inactive members in the server.
+
+    purgenotify:
+      enabled: true
+      visible: true
+      description: Notifies all purgelist members about their inactivity.
+
+    shutdown:
+      enabled: true
+      visible: false
+      description: Shut me down :c (Bot-owner only)
+
+    wordcloud:
+      enabled: true
+      visible: true
+      description: Summarizes a server's, channel's, or user's message history into a word cloud.
+      usage: "[#channel/@username] (optional)"
+
 servers:
   533368376148361216:
     on_message:
       level_up:
+        enabled: false
         roles:
           5:
             id: 533369804334039061
