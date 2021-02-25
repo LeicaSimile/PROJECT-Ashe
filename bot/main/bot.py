@@ -10,7 +10,7 @@ from main import commands
 from main import database
 from main.settings import Settings
 
-class Bot(object):    
+class Bot(object):
     def __init__(self, logger=None, **options):
         self.logger = logger or logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)

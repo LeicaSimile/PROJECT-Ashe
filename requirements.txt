@@ -3,7 +3,6 @@ matplotlib==3.3.4
 requests
 wordcloud
 psycopg2
-pytest
 multidict
 pyyaml
 mee6-py-api
