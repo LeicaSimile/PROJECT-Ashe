@@ -159,7 +159,7 @@ class Admin(commands.Cog):
                 response = "Don't tell me what to do."
                 await self.bot.say(context.channel, response)
                 
-    @commands.command(description="Sends a list of inactive members in the server.")
+    @commands.command(description=Settings.command_settings("purgelist").get("description"))
     async def purgelist(self, context):
         def check(reaction, user):
             return reaction.message.id == report.id and user.id == context.message.author.id \
@@ -205,11 +205,11 @@ class Admin(commands.Cog):
         
         return CommandStatus.COMPLETED
     
-    @commands.command(description="Notifies all purgelist members on their inactivity.")
+    @commands.command(description=Settings.command_settings("purgenotify").get("description"))
     async def purgenotify(self, context):
         await self.notify_inactive_members(context)
 
-    @commands.command(description="")
+    @commands.command(description=Settings.command_settings("exempt").get("description"))
     async def exempt(self, context):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
@@ -223,7 +223,10 @@ class Admin(commands.Cog):
         elif cmd_type == "list":
             pass
 
-    @commands.command(description="Send a message through me.")
+    @commands.command(
+        description=Settings.command_settings("message").get("description"),
+        usage=Settings.command_settings("message").get("usage")
+    )
     async def message(self, context):
         async def get_destination(context):
             def check_destination(msg):
@@ -283,15 +286,9 @@ class Admin(commands.Cog):
             await context.channel.send(f"Message sent: {sent.jump_url}")
 
     @commands.command(
-        description="Edit a message sent through me.",
-        usage="#[channel name]",
-        help="""Paste the message ID when prompted, then enter the new message.
-
-        To get the message ID, enable developer mode in App Settings > Appearance > Advanced > Developer Mode.
-        
-        (PC) Hover to the right of the message and click the three vertical dots > Copy ID.
-        (Mobile) Tap and hold the message > Copy ID.
-        """
+        description=Settings.command_settings("edit").get("description"),
+        usage=Settings.command_settings("edit").get("usage"),
+        help=Settings.command_settings("edit").get("help")
     )
     async def edit(self, context):
         def check_id(msg):
@@ -357,7 +354,7 @@ class Admin(commands.Cog):
 
         return CommandStatus.COMPLETED
 
-    @commands.command(description="Get a list of members on the MEE6 leaderboard who are no longer on the server.")
+    @commands.command(description=Settings.command_settings("purgeleaderboard").get("description"))
     async def purgeleaderboard(self, context):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
@@ -383,7 +380,7 @@ class Admin(commands.Cog):
         except mee6_py_api.exceptions.HTTPRequestError:
             await self.bot.say(context.channel, "I couldn't find this server's MEE6 leaderboard.")
 
-    @commands.command(description="Shut me down :c")
+    @commands.command(Settings.command_settings("shutdown").get("description"))
     async def shutdown(self, context):
         async def log_out(context):
             try:

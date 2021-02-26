@@ -10,6 +10,7 @@ from wordcloud import WordCloud
 from matplotlib.image import imread
 from spacy.lang.en.stop_words import STOP_WORDS
 
+from main.settings import Settings
 from main.status import CommandStatus
 
 def get_word_frequencies(text):
@@ -40,7 +41,9 @@ class Statistics(commands.Cog):
         """
         self.bot = bot
 
-    @commands.command(description="Summarizes a server, channel, or user's message history into a word cloud.", usage="[channel/username] (optional)")
+    @commands.command(
+        description=Settings.command_settings("wordcloud").get("description"),
+        usage=Settings.command_settings("wordcloud").get("usage"))
     async def wordcloud(self, context):
         arguments = context.message.content.split()
         messages = []
