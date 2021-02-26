@@ -209,7 +209,7 @@ class Admin(commands.Cog):
     async def purgenotify(self, context):
         await self.notify_inactive_members(context)
 
-    @commands.command(description=Settings.command_settings("exempt").get("description"))
+    @commands.command()
     async def exempt(self, context):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
@@ -380,7 +380,7 @@ class Admin(commands.Cog):
         except mee6_py_api.exceptions.HTTPRequestError:
             await self.bot.say(context.channel, "I couldn't find this server's MEE6 leaderboard.")
 
-    @commands.command(Settings.command_settings("shutdown").get("description"))
+    @commands.command(description=Settings.command_settings("shutdown").get("description"))
     async def shutdown(self, context):
         async def log_out(context):
             try:

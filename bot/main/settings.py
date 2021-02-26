@@ -40,8 +40,8 @@ class Settings(object):
             app_config_filename = "app_dev.yaml"
             features_config_filename = "features_dev.yaml"
 
-        config["app"] = cls.load_config(app_config_filename)
-        config["features"] = cls.load_config(features_config_filename)
+        cls.config["app"] = cls.load_config(app_config_filename)
+        cls.config["features"] = cls.load_config(features_config_filename)
 
     @classmethod
     def app_defaults(cls, key=""):
