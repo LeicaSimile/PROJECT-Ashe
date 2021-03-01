@@ -25,7 +25,7 @@ class Logger(object):
         cls._log(log_object, logging.CRITICAL, msg, *args, **kwargs)
 
     @classmethod
-    def _log(log_object, log_level, message, *args, **kwargs):
+    def _log(cls, log_object, log_level, message, *args, **kwargs):
         log_map = {
             logging.DEBUG: log_object.debug,
             logging.INFO: log_object.info,

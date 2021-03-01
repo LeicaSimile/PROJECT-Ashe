@@ -2,6 +2,7 @@ import logging
 import os
 import yaml
 from pathlib import Path
+from main.logger import Logger
 
 logger = logging.getLogger(__name__)
 
@@ -135,12 +136,12 @@ class Settings(object):
                 try:
                     return server_config["days_threshold"]
                 except KeyError as err:
-                    logger.debug(f"'inactivity' config for server ID {server_id} is missing a setting for 'days_threshold'. Using default setting instead.")
+                    Logger.debug(logger, f"'inactivity' config for server ID {server_id} is missing a setting for 'days_threshold'. Using default setting instead.")
         
         try:
             return cls.default_features("inactivity")["days_threshold"]
         except KeyError as err:
-            logger.warn(f"Missing a default setting for 'inactivity' feature: 'days_threshold'. {err}")
+            Logger.warn(logger, f"Missing a default setting for 'inactivity' feature: 'days_threshold'. {err}")
             return 14
 
     @classmethod
@@ -154,7 +155,7 @@ class Settings(object):
                 try:
                     return server_config["message"]
                 except KeyError as err:
-                    logger.debug(f"'inactivity' config for server ID {server_id} is missing a setting for 'message'. Using default setting instead.")
+                    Logger.debug(logger, f"'inactivity' config for server ID {server_id} is missing a setting for 'message'. Using default setting instead.")
                     return default_config["message"]
         
         return None
@@ -167,12 +168,12 @@ class Settings(object):
                 try:
                     return server_config["include_reactions"]
                 except KeyError as err:
-                    logger.debug(f"'inactivity' config for server ID {server_id} is missing a setting for 'include_reactions'. Using default setting instead.")
+                    Logger.debug(logger, f"'inactivity' config for server ID {server_id} is missing a setting for 'include_reactions'. Using default setting instead.")
         
         try:
             return cls.default_features("inactivity")["include_reactions"]
         except KeyError as err:
-            logger.warn(f"{events_config_filename} is missing a default setting for 'inactivity: include_reactions'. {err}")
+            Logger.warn(logger, f"{events_config_filename} is missing a default setting for 'inactivity: include_reactions'. {err}")
         
         return True
 

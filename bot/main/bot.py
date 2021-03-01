@@ -8,7 +8,7 @@ from pathlib import Path
 
 from main import commands
 from main import database
-from main import utils
+from main.logger import Logger
 from main.settings import Settings
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class Bot(discord.ext.commands.Bot):
     # --- Events ---
     async def on_ready(self):
         prefix = Settings.app_defaults("cmd_prefix")
-        logger.info(f"{self.user.name} (ID: {self.user.id}) is now online.")
+        Logger.info(logger, f"{self.user.name} (ID: {self.user.id}) is now online.")
         status = Settings.app_defaults("status").format(prefix=prefix)
         await self.change_presence(activity=discord.Game(name=status))
 
@@ -42,7 +42,7 @@ class Bot(discord.ext.commands.Bot):
                 try:
                     await message.delete()
                 except (discord.Forbidden, discord.HTTPException) as e:
-                    logger.warning(f"Unable to delete message at {message.jump_url}. {e}")
+                    Logger.warn(logger, f"Unable to delete message at {message.jump_url}. {e}")
                 else:
                     await self.say(message.author, f"{custom_message}\nYour message: ```{content}```")
                     return True
@@ -51,12 +51,12 @@ class Bot(discord.ext.commands.Bot):
 
         user = message.author
         if message.guild:
-            logger.info(f"({message.guild.name} - {message.channel.name}) {user.name}: {message.content}")
+            Logger.info(logger, f"({message.guild.name} - {message.channel.name}) {user.name}: {message.content}")
         else:
             try:
-                logger.info(f"({message.channel.name}) {user.name}: {message.content}")
+                Logger.info(logger, f"({message.channel.name}) {user.name}: {message.content}")
             except AttributeError:
-                logger.info(f"({user.name}) {message.content}")
+                Logger.info(logger, f"({user.name}) {message.content}")
             finally:
                 return
 
@@ -66,7 +66,7 @@ class Bot(discord.ext.commands.Bot):
             if result:
                 mentioned = message.mentions[0]
                 level = int(result.group(1))
-                logger.info(f"{mentioned.name} reached level {level}")
+                Logger.info(logger, f"{mentioned.name} reached level {level}")
 
                 roles = mee6_level_up["roles"]
                 for r in roles:
@@ -92,12 +92,12 @@ class Bot(discord.ext.commands.Bot):
     async def on_message_edit(self, before, after):
         def log_message(message, content):
             if message.guild:
-                logger.info(f"({message.guild.name} - {message.channel.name}){content}")
+                Logger.info(logger, f"({message.guild.name} - {message.channel.name}){content}")
             else:
                 try:
-                    logger.info(f"({message.channel.name}){content}")
+                    Logger.info(logger, f"({message.channel.name}){content}")
                 except AttributeError:
-                    logger.info(f"({message.author.name}){content}")
+                    Logger.info(logger, f"({message.author.name}){content}")
 
         if before.pinned and not after.pinned:
             log_message(after, f"<Unpinned> {after.author.display_name}: {after.content}")
