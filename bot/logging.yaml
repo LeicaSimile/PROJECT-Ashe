@@ -48,12 +48,16 @@ handlers:
 loggers:
   root:
     level: WARN
-    handlers: [root]
+    handlers: []
 
-  bot:
+  main.bot:
+    level: INFO
+    handlers: [console, info_file, error_file]
+
+  main.settings:
     level: DEBUG
-    handlers: [debug_file, console, info_file, error_file]
+    handlers: [debug_file, error_file]
 
-  database:
+  main.utils.general:
     level: DEBUG
     handlers: [debug_file, error_file]

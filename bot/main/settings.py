@@ -3,7 +3,7 @@ import os
 import yaml
 from pathlib import Path
 
-logger = logging.getLogger("bot")
+logger = logging.getLogger(__name__)
 
 class Settings(object):
     config = {}

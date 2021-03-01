@@ -5,6 +5,7 @@ import logging.config
 import os
 import yaml
 from pathlib import Path
+from main.settings import Settings
 from main.bot import Bot
 
 try:
@@ -18,7 +19,9 @@ with open(Path(__file__).parent.joinpath("logging.yaml"), "r") as f:
 logging.config.dictConfig(log_config)
 
 def main():
-    ashe = Bot(logger=logging.getLogger("bot"))
+    command_prefix = Settings.app_defaults("cmd_prefix")
+    description = Settings.app_defaults("description")
+    ashe = Bot(command_prefix=command_prefix, description=description)
     ashe.run()
 
 

@@ -195,7 +195,7 @@ class Admin(commands.Cog):
         if inactivity_message:
             await report.add_reaction("📧")
             try:
-                reaction, user = await self.bot.client.wait_for("reaction_add", timeout=600, check=check)
+                reaction, user = await self.bot.wait_for("reaction_add", timeout=600, check=check)
             except asyncio.TimeoutError:
                 report_embed.set_footer(text=discord.Embed.Empty)
                 await report.edit(embed=report_embed)
@@ -234,7 +234,7 @@ class Admin(commands.Cog):
 
             await context.channel.send("Which channel should the message be sent to?")
             try:
-                destination = await self.bot.client.wait_for("message", timeout=60, check=check_destination)
+                destination = await self.bot.wait_for("message", timeout=60, check=check_destination)
                 return destination.content
             except asyncio.TimeoutError:
                 return False
@@ -245,7 +245,7 @@ class Admin(commands.Cog):
 
             await context.channel.send("What's your message?")
             try:
-                message = await self.bot.client.wait_for("message", timeout=120, check=check_message)
+                message = await self.bot.wait_for("message", timeout=120, check=check_message)
                 return message.content
             except asyncio.TimeoutError:
                 return False
@@ -309,7 +309,7 @@ class Admin(commands.Cog):
 
         await context.channel.send("Enter the message ID to be edited:")
         try:
-            message_id = await self.bot.client.wait_for("message", timeout=300, check=check_id)
+            message_id = await self.bot.wait_for("message", timeout=300, check=check_id)
             message_id = message_id.content
         except asyncio.TimeoutError:
             await context.channel.send("Time's up.")
@@ -339,7 +339,7 @@ class Admin(commands.Cog):
             await context.channel.send(content="Enter the newly edited message below.")
             
             try:
-                new_edit = await self.bot.client.wait_for("message", timeout=900, check=check_message)
+                new_edit = await self.bot.wait_for("message", timeout=900, check=check_message)
             except asyncio.TimeoutError:
                 await context.channel.send("Time's up.")
                 return CommandStatus.CANCELLED
@@ -387,7 +387,7 @@ class Admin(commands.Cog):
                 response = ""
                 await self.bot.say(context.channel, response, context)
             finally:
-                await self.bot.client.logout()
+                await self.bot.logout()
                 return CommandStatus.COMPLETED
 
         async def sass(context):
