@@ -58,6 +58,6 @@ loggers:
     level: DEBUG
     handlers: [debug_file, error_file]
 
-  main.utils.general:
+  main.utils.logger:
     level: DEBUG
     handlers: [debug_file, error_file]

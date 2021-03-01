@@ -8,6 +8,7 @@ from pathlib import Path
 
 from main import commands
 from main import database
+from main import utils
 from main.settings import Settings
 
 logger = logging.getLogger(__name__)

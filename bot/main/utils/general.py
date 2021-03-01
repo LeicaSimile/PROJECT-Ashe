@@ -1,25 +1,6 @@
-import logging
 import math
 import discord
 from main.settings import Settings
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-def log(message, log_level, log_object=logging, *args, **kwargs):
-    log_map = {
-        logging.DEBUG: log_object.debug,
-        logging.INFO: log_object.info,
-        logging.WARN: log_object.warn,
-        logging.ERROR: log_object.error,
-        logging.CRITICAL: log_object.critical,
-    }
-    try:
-        log_map[log_level](message, *args, **kwargs)
-    except UnicodeEncodeError:
-        log_map[log_level](message.encode("utf-8", errors="replace"), *args, **kwargs)
-    except AttributeError as invalid_arg_err:
-        logger.error(invalid_arg_err)
 
 def split_embeds(title, description, url=None, timestamp=None, delimiter="\n"):
     """Returns a list of embeds split according to Discord character limits."""
