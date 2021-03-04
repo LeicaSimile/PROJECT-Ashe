@@ -23,7 +23,7 @@ class General(commands.Cog):
     async def define(self, context):
         args = context.message.clean_content.split(maxsplit=1)
         if 2 > len(args):
-            await context.channel.send(f"Type `{context.prefix}{context.command.name} {context.command.usage}` to look up a term in the dictionary.")
+            await self.bot.say(context.channel, content=f"Type `{context.prefix}{context.command.name} {context.command.usage}` to look up a term in the dictionary.")
             return
 
         search_term = re.sub(r"\s+", " ", args[1].strip())
@@ -56,6 +56,6 @@ class General(commands.Cog):
                 suggestions = "\n".join(search_results)
                 reply.description = f"**Did you mean...**\n*{suggestions}*"
 
-            await context.channel.send(embed=reply)
+            await self.bot.say(context.channel, embed=reply)
         else:
-            await context.channel.send(f"Couldn't find a definition for `{search_term}`.")
+            await self.bot.say(context.channel, content=f"Couldn't find a definition for `{search_term}`.")

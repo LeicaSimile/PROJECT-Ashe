@@ -7,6 +7,7 @@ import yaml
 from pathlib import Path
 
 from main import commands
+from main import utils
 from main import database
 from main.logger import Logger
 from main.settings import Settings
@@ -44,7 +45,7 @@ class Bot(discord.ext.commands.Bot):
                 except (discord.Forbidden, discord.HTTPException) as e:
                     Logger.warn(logger, f"Unable to delete message at {message.jump_url}. {e}")
                 else:
-                    await self.say(message.author, f"{custom_message}\nYour message: ```{content}```")
+                    await self.say(message.author, context=message, parse=True, content=f"{custom_message}\nYour message: ```{content}```")
                     return True
 
             return False
@@ -117,37 +118,38 @@ class Bot(discord.ext.commands.Bot):
         after_roles = [r.id for r in after.roles]
         for role in milestones["roles"]:
             if role in after_roles and role not in before_roles:
-                output_channel = discord.utils.get(after.guild.channels, name=milestones[role]["channel"])
-                await self.say(output_channel, milestones["roles"][role]["message"], context=after, parse=True)
+                output_channel = discord.utils.get(after.guild.channels, name=milestones["roles"][role]["channel"])
+                await self.say(output_channel, context=after, parse=True, content=milestones["roles"][role]["message"])
             
         return
 
     # --- Utility methods ---
-    async def say(self, channel, message, context=None, parse=False):
+    async def say(self, channel, context=None, parse=False, **kwargs):
+        """
+        Args:
+            channel(discord.abc.Messageable): The message's destination (e.g. TextChannel, DMChannel, etc.)
+            context(discord.ext.commands.Context): The original context of the message
+            **kwargs: Any arguments accepted by discord.Channel.send()
+        """
         if parse and context:
-            server_name = "the server"
-            if hasattr(context, "guild"):
-                server = context.guild.name
+            content = kwargs.get("content")
+            embed = kwargs.get("embed")
 
-            channel_name = ""
-            if hasattr(context, "channel"):
-                channel = context.channel.name
-            
-            mention = ""
-            if hasattr(context, "mention"):
-                mention = context.mention
+            if content:
+                kwargs["content"] = utils.substitute_text(content, context)
+            if embed:
+                if embed.title:
+                    embed.title = utils.substitute_text(embed.title, context)
+                if embed.description:
+                    embed.description = utils.substitute_text(embed.description, context)
+                if embed.footer:
+                    embed.footer.text = utils.substitute_text(embed.footer.text, context)
+                if embed.fields:
+                    for f in embed.fields:
+                        f.value = utils.substitute_text(f.value, context)
+                kwargs["embed"] = embed
 
-            message = message.format(server=server_name, channel=channel_name, mention=mention)
-            try:
-                re_channels = set(re.findall(r"\[#(.+?)\]", message))
-                for c in re_channels:
-                    c_object = discord.utils.get(context.guild.channels, name=c)
-                    if c_object:
-                        message = message.replace(f"[#{c}]", c_object.mention)
-            except AttributeError:
-                pass
-
-        await channel.send(content=message)
+        return await channel.send(**kwargs)
 
     def set_commands(self, *cmds):
         self.add_cog(commands.Admin(self))

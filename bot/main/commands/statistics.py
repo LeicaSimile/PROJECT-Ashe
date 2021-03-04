@@ -60,7 +60,7 @@ class Statistics(commands.Cog):
             channels = [context.message.channel_mentions[0]]
             subject = f"#{channels[0].name}"
 
-        report = await context.channel.send(f"Scanning {subject}'s past {days} days...")
+        report = await self.bot.say(context.channel, content=f"Scanning {subject}'s past {days} days...")
 
         for channel in channels:
             try:
@@ -92,5 +92,5 @@ class Statistics(commands.Cog):
         wc.to_file(wc_filepath)
 
         await report.delete()
-        await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
+        await self.bot.say(context.channel, content=f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
         return CommandStatus.COMPLETED

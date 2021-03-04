@@ -1,4 +1,5 @@
 import math
+import re
 import discord
 from main.settings import Settings
 
@@ -24,3 +25,33 @@ def split_embeds(title, description, url=None, timestamp=None, delimiter="\n"):
 
 def split_messages(content):
     pass
+
+def substitute_text(text, context):
+    server_name = "the server"
+    if hasattr(context, "guild"):
+        server = context.guild.name
+
+    channel_name = ""
+    if hasattr(context, "channel"):
+        channel = context.channel.name
+    
+    mention = ""
+    if hasattr(context, "mention"):
+        mention = context.mention
+
+    substitutions = {
+        "server": server_name,
+        "channel": channel_name,
+        "mention": mention
+    }
+    text = text.format(**substitutions)
+    try:
+        re_channels = set(re.findall(r"\[#(.+?)\]", text))
+        for c in re_channels:
+            c_object = discord.utils.get(context.guild.channels, name=c)
+            if c_object:
+                text = text.replace(f"[#{c}]", c_object.mention)
+    except AttributeError:
+        pass
+
+    return text

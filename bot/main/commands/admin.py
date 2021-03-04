@@ -27,17 +27,26 @@ async def get_inactive_members(context, progress_report=True):
     days_threshold = Settings.inactive_threshold(context.guild.id)
     time_boundary = now - datetime.timedelta(days=days_threshold)
     progress_msg = None
+    include_reactions = Settings.include_reactions_inactivity(context.guild.id)
 
-    channel_count = len(context.guild.text_channels)
+    included_channels = context.guild.text_channels
+    channel_count = len(included_channels)
 
     if progress_report:
         progress_msg = await context.channel.send(f"Scanning {channel_count} channels for inactive members.")
     
-    for i, channel in enumerate(context.guild.text_channels):
+    for i, channel in enumerate(included_channels):
         try:
-            async for m in channel.history(limit=None, after=(now - datetime.timedelta(days=14)), oldest_first=False):
+            async for m in channel.history(limit=None, after=(now - datetime.timedelta(days=days_threshold)), oldest_first=False):
                 if m.author not in senders:
                     senders.append(m.author)
+
+                if include_reactions:
+                    for r in m.reactions:
+                        async for u in r.users:
+                            if u not in senders:
+                                senders.append(u)
+
         except discord.errors.Forbidden:
             print(f"Can't access {channel.name}")
         else:
@@ -51,7 +60,7 @@ async def get_inactive_members(context, progress_report=True):
         u for u in context.guild.members
         if u not in senders and u.joined_at < time_boundary and not u.bot
     ]
-    db_inactive_members = database.get_all_inactive_members(context.guild.id)
+    db_inactive_members = [] # database.get_all_inactive_members(context.guild.id)
 
     for member in results:
         if member.id in db_inactive_members:
@@ -60,7 +69,7 @@ async def get_inactive_members(context, progress_report=True):
             inactive_members.append(m)
         else:
             inactive_members.append(database.InactiveMember(context.guild.id, member.id, user=member))
-    update_inactive_members(db_inactive_members, {m.member_id: m for m in inactive_members})
+    # update_inactive_members(db_inactive_members, {m.member_id: m for m in inactive_members})
 
     return inactive_members
 
@@ -98,7 +107,7 @@ class Admin(commands.Cog):
         failed = []
         for member in members:
             try:
-                await member.send(content=message)
+                await self.bot.say(member, content=message)
             except discord.DiscordException as e:
                 failed.append(member)
                 print(e.text)
@@ -111,22 +120,22 @@ class Admin(commands.Cog):
                 title="Notified Members",
                 description=messaged
             )
-            await context.channel.send(embed=report_embed)
+            self.bot.say(context.channel, embed=report_embed)
         if failed:
             not_messaged = "\n".join([f"{m.mention} [{m.display_name}]" for m in failed])
             report_embed = discord.Embed(
                 title="Failed to Notify",
                 description=not_messaged
             )
-            await context.channel.send(f"Couldn't message the following inactive members:", embed=report_embed)
+            await self.bot.say(context.channel, content=f"Couldn't message the following inactive members:", embed=report_embed)
 
     async def notify_inactive_members(self, context, members=None):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
 
-        message = Settings.get_inactive_message(context.guild.id)
+        message = Settings.inactive_message(context.guild.id)
         if not message:
-            await context.channel.send("There is no inactivity message for this server.")
+            await self.bot.say(context.channel, content="There is no inactivity message for this server.")
             return CommandStatus.FAILED
 
         if not members:
@@ -135,38 +144,17 @@ class Admin(commands.Cog):
         
         await self.notify_members(context, members, message)
         return CommandStatus.COMPLETED
-
-    async def validate_owner(self, context, function_pass, function_fail=None):
-        """Check if the owner issued the command.
-
-        Args:
-            context (discord.Context): Context of the command.
-            function_pass (func): Function to call if check passes.
-                Must be a coroutine that accepts a GeneralContext object
-                as an argument.
-            function_fail (func, optional): Function to call if check fails.
-                Must be a coroutine that accepts a GeneralContext object
-                as an argument. If none provided, bot will give a stock
-                warning to the user.
-
-        """
-        if str(context.author.id) == Settings.config["env"]["owner_id"]:
-            await function_pass(context)
-        else:
-            try:
-                await function_fail(context)
-            except TypeError:
-                response = "Don't tell me what to do."
-                await self.bot.say(context.channel, response)
                 
     @commands.command(description=Settings.command_settings("purgelist").get("description"))
+    @commands.has_guild_permissions(administrator=True)
     async def purgelist(self, context):
         def check(reaction, user):
             return reaction.message.id == report.id and user.id == context.message.author.id \
                 and str(reaction.emoji) == "📧"
 
-        if not await validate_access(context, context.message.author):
-            return CommandStatus.INVALID
+        cmd_settings = Settings.command_settings("purgelist", context.guild.id)
+        if not cmd_settings.get("enabled"):
+            return
 
         inactive_members = await get_inactive_members(context)
         inactive_list = []
@@ -180,17 +168,17 @@ class Admin(commands.Cog):
             title=f"Inactive Members ({days_threshold}+ days since last message)",
             description="\n".join(inactive_list)
         ):
-            await context.channel.send(embed)
+            self.bot.say(context.channel, embed=embed)
 
         report_embed = discord.Embed(
             title=f"Inactive Members ({days_threshold}+ days since last message)",
             description="\n".join(inactive_list[starting_line:])
         )
 
-        inactivity_message = utils.get_inactive_message(context.guild.id)
+        inactivity_message = Settings.inactive_message(context.guild.id)
         if inactivity_message:
             report_embed.set_footer(text="React 📧 below to notify them")
-        report = await context.channel.send(f"{context.author.mention}", embed=report_embed)
+        report = self.bot.say(context.channel, content=f"{context.author.mention}", embed=report_embed)
         
         if inactivity_message:
             await report.add_reaction("📧")
@@ -206,13 +194,20 @@ class Admin(commands.Cog):
         return CommandStatus.COMPLETED
     
     @commands.command(description=Settings.command_settings("purgenotify").get("description"))
+    @commands.has_guild_permissions(administrator=True)
     async def purgenotify(self, context):
+        cmd_settings = Settings.command_settings("purgenotify", context.guild.id)
+        if not cmd_settings.get("enabled"):
+            return
+
         await self.notify_inactive_members(context)
 
     @commands.command()
+    @commands.has_guild_permissions(administrator=True)
     async def exempt(self, context):
-        if not await validate_access(context, context.message.author):
-            return CommandStatus.INVALID
+        cmd_settings = Settings.command_settings("exempt", context.guild.id)
+        if not cmd_settings.get("enabled"):
+            return
 
         args = context.message.split(maxsplit=2)
         cmd_type = args[1].lower()
@@ -227,12 +222,13 @@ class Admin(commands.Cog):
         description=Settings.command_settings("message").get("description"),
         usage=Settings.command_settings("message").get("usage")
     )
+    @commands.has_guild_permissions(administrator=True)
     async def message(self, context):
         async def get_destination(context):
             def check_destination(msg):
                 return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id and msg.channel_mentions
 
-            await context.channel.send("Which channel should the message be sent to?")
+            await self.bot.say(context.channel, content="Which channel should the message be sent to?")
             try:
                 destination = await self.bot.wait_for("message", timeout=60, check=check_destination)
                 return destination.content
@@ -243,15 +239,16 @@ class Admin(commands.Cog):
             def check_message(msg):
                 return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
 
-            await context.channel.send("What's your message?")
+            await self.bot.say(context.channel, content="What's your message?")
             try:
                 message = await self.bot.wait_for("message", timeout=120, check=check_message)
                 return message.content
             except asyncio.TimeoutError:
                 return False
 
-        if not await validate_access(context, context.message.author):
-            return CommandStatus.INVALID
+        cmd_settings = Settings.command_settings("message", context.guild.id)
+        if not cmd_settings.get("enabled"):
+            return
 
         arguments = context.message.content.split(maxsplit=2)
         destination_id = None
@@ -267,7 +264,7 @@ class Admin(commands.Cog):
         destination_id = destination_id.strip("<># ")
         destination = discord.utils.find(lambda c: str(c.id) == destination_id, context.guild.text_channels)
         if not destination:
-            await context.channel.send("I couldn't find that channel on this server.")
+            await self.bot.say(context.channel, content="I couldn't find that channel on this server.")
             return CommandStatus.INVALID
 
         try:
@@ -278,18 +275,19 @@ class Admin(commands.Cog):
                 return CommandStatus.CANCELLED
         
         try:
-            sent = await destination.send(msg)
+            sent = await self.bot.say(destination, content=msg)
         except discord.Forbidden:
-            await context.channel.send(f"I don't have permission to send messages to {destination.name}")
+            await self.bot.say(context.channel, content=f"I don't have permission to send messages to {destination.name}")
             return CommandStatus.FORBIDDEN
         else:
-            await context.channel.send(f"Message sent: {sent.jump_url}")
+            await self.bot.say(context.channel, content=f"Message sent: {sent.jump_url}")
 
     @commands.command(
         description=Settings.command_settings("edit").get("description"),
         usage=Settings.command_settings("edit").get("usage"),
         help=Settings.command_settings("edit").get("help")
     )
+    @commands.has_guild_permissions(administrator=True)
     async def edit(self, context):
         def check_id(msg):
             return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
@@ -297,36 +295,37 @@ class Admin(commands.Cog):
         def check_message(msg):
             return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
 
-        if not await validate_access(context, context.message.author):
+        cmd_settings = Settings.command_settings("edit", context.guild.id)
+        if not cmd_settings.get("enabled"):
             return
 
         arguments = context.message.content.split()
         message_id = 0
         if not context.message.channel_mentions:
-            await context.channel.send("To use, put: ```;edit #[channel name]```, where [channel name] is where the message is.")
+            await self.bot.say(context.channel, content="To use, put: ```;edit #[channel name]```, where [channel name] is where the message is.")
             return CommandStatus.INVALID
         channel = context.message.channel_mentions[0]
 
-        await context.channel.send("Enter the message ID to be edited:")
+        await self.bot.say(context.channel, content="Enter the message ID to be edited:")
         try:
             message_id = await self.bot.wait_for("message", timeout=300, check=check_id)
             message_id = message_id.content
         except asyncio.TimeoutError:
-            await context.channel.send("Time's up.")
+            await self.bot.say(context.channel, content="Time's up.")
             return CommandStatus.CANCELLED
 
         try:
             message_id = int(message_id)
         except ValueError:
-            await context.channel.send(f"{message_id} is not a valid message ID.")
+            await self.bot.say(context.channel, content=f"{message_id} is not a valid message ID.")
             return CommandStatus.INVALID
 
         to_edit = await channel.fetch_message(message_id)
         if not to_edit:
-            await context.channel.send(f"Couldn't find message with ID #{message_id}.")
+            await self.bot.say(context.channel, content=f"Couldn't find message with ID #{message_id}.")
             return CommandStatus.INVALID
         elif to_edit.author.id != context.guild.me.id:
-            await context.channel.send("I can only edit messages I sent.")
+            await self.bot.say(context.channel, content="I can only edit messages I sent.")
             return CommandStatus.INVALID
         else:
             for preview in utils.split_embeds(
@@ -335,29 +334,31 @@ class Admin(commands.Cog):
                 url=to_edit.jump_url,
                 timestamp=to_edit.edited_at if to_edit.edited_at else to_edit.created_at
             ):
-                await context.channel.send(embed=preview)
-            await context.channel.send(content="Enter the newly edited message below.")
+                await self.bot.say(context.channel, embed=preview)
+            await self.bot.say(context.channel, content="Enter the newly edited message below.")
             
             try:
                 new_edit = await self.bot.wait_for("message", timeout=900, check=check_message)
             except asyncio.TimeoutError:
-                await context.channel.send("Time's up.")
+                await self.bot.say(context.channel, content="Time's up.")
                 return CommandStatus.CANCELLED
             else:
                 try:
                     await to_edit.edit(content=new_edit.content)
                 except discord.Forbidden:
-                    await context.channel.send("I'm not allowed to edit this message.")
+                    await self.bot.say(context.channel, content="I'm not allowed to edit this message.")
                     return CommandStatus.FORBIDDEN
                 else:
-                    await context.channel.send(f"Message edited: {to_edit.jump_url}")
+                    await self.bot.say(context.channel, content=f"Message edited: {to_edit.jump_url}")
 
         return CommandStatus.COMPLETED
 
     @commands.command(description=Settings.command_settings("purgeleaderboard").get("description"))
+    @commands.has_guild_permissions(administrator=True)
     async def purgeleaderboard(self, context):
-        if not await validate_access(context, context.message.author):
-            return CommandStatus.INVALID
+        cmd_settings = Settings.command_settings("purgeleaderboard", context.guild.id)
+        if not cmd_settings.get("enabled"):
+            return
 
         mee6 = mee6_py_api.API(context.guild.id)
         member_ids = [str(m.id) for m in context.guild.members]
@@ -374,26 +375,14 @@ class Admin(commands.Cog):
                     title=f"MEE6 leaderboard members who left the server (p. {i})",
                     description="\n".join(absent_members)
                 )
-                await context.channel.send(embed=report)
+                await self.bot.say(context.channel, embed=report)
                 i += 1
 
         except mee6_py_api.exceptions.HTTPRequestError:
-            await self.bot.say(context.channel, "I couldn't find this server's MEE6 leaderboard.")
+            await self.bot.say(context.channel, content="I couldn't find this server's MEE6 leaderboard.")
 
     @commands.command(description=Settings.command_settings("shutdown").get("description"))
+    @commands.is_owner()
     async def shutdown(self, context):
-        async def log_out(context):
-            try:
-                response = ""
-                await self.bot.say(context.channel, response, context)
-            finally:
-                await self.bot.logout()
-                return CommandStatus.COMPLETED
-
-        async def sass(context):
-            response = "Don't tell me what to do."
-            await self.bot.say(context.channel, response)
-            return CommandStatus.INVALID
-
-        await self.validate_owner(context, log_out, sass)
-    
+        await self.bot.logout()
+        return CommandStatus.COMPLETED
