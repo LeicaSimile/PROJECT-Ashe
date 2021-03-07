@@ -7,8 +7,8 @@ default:
 
   inactivity:
     days_threshold: 14
-    include_reactions: True
-    message_enabled: True
+    include_reactions: false
+    message_enabled: true
     message: |-
       Hello, you've been marked as inactive on ***{server}***.
       
@@ -156,7 +156,6 @@ servers:
             channel: "general-chat"
             message: |-
               Greetings, {mention}. State thy intro in [#introductions] and declare thy titles in [#roles].
-
   
   670671037343727646:
     on_member_update:

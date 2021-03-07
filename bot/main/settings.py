@@ -154,7 +154,7 @@ class Settings(object):
             ):
                 try:
                     return server_config["message"]
-                except KeyError as err:
+                except KeyError:
                     Logger.debug(logger, f"'inactivity' config for server ID {server_id} is missing a setting for 'message'. Using default setting instead.")
                     return default_config["message"]
         
@@ -173,7 +173,7 @@ class Settings(object):
         try:
             return cls.default_features("inactivity")["include_reactions"]
         except KeyError as err:
-            Logger.warn(logger, f"{events_config_filename} is missing a default setting for 'inactivity: include_reactions'. {err}")
+            Logger.warn(logger, f"Missing a default setting for 'inactivity: include_reactions'. {err}")
         
         return True
 

@@ -43,6 +43,20 @@ default:
       enabled: false
       visible: false
 
+    inactivelist:
+      enabled: true
+      visible: true
+      aliases:
+        - purgelist
+      description: Shows a list of inactive members in the server.
+
+    inactivenotify:
+      enabled: true
+      visible: true
+      aliases:
+        - purgenotify
+      description: Notifies all inactivelist members about their inactivity.
+
     message:
       enabled: true
       visible: true
@@ -53,16 +67,6 @@ default:
       enabled: true
       visible: true
       description: Get a list of members on the MEE6 leaderboard who are no longer on the server.
-
-    purgelist:
-      enabled: true
-      visible: true
-      description: Shows a list of inactive members in the server.
-
-    purgenotify:
-      enabled: true
-      visible: true
-      description: Notifies all purgelist members about their inactivity.
 
     shutdown:
       enabled: true

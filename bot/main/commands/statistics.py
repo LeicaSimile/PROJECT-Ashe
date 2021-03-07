@@ -10,6 +10,7 @@ from wordcloud import WordCloud
 from matplotlib.image import imread
 from spacy.lang.en.stop_words import STOP_WORDS
 
+from main import utils
 from main.settings import Settings
 from main.status import CommandStatus
 
@@ -60,7 +61,7 @@ class Statistics(commands.Cog):
             channels = [context.message.channel_mentions[0]]
             subject = f"#{channels[0].name}"
 
-        report = await self.bot.say(context.channel, content=f"Scanning {subject}'s past {days} days...")
+        report = await utils.say(context.channel, content=f"Scanning {subject}'s past {days} days...")
 
         for channel in channels:
             try:
@@ -92,5 +93,5 @@ class Statistics(commands.Cog):
         wc.to_file(wc_filepath)
 
         await report.delete()
-        await self.bot.say(context.channel, content=f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
+        await utils.say(context.channel, content=f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
         return CommandStatus.COMPLETED

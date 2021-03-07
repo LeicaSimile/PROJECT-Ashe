@@ -45,7 +45,7 @@ class Bot(discord.ext.commands.Bot):
                 except (discord.Forbidden, discord.HTTPException) as e:
                     Logger.warn(logger, f"Unable to delete message at {message.jump_url}. {e}")
                 else:
-                    await self.say(message.author, context=message, parse=True, content=f"{custom_message}\nYour message: ```{content}```")
+                    await utils.say(message.author, context=message, parse=True, content=f"{custom_message}\nYour message: ```{content}```")
                     return True
 
             return False
@@ -77,7 +77,6 @@ class Bot(discord.ext.commands.Bot):
         
         pics_only = Settings.on_message_features(message.guild.id, "pics_only")
         if pics_only and pics_only.get("enabled"):
-            guild = message.guild
             channel = message.channel
 
             if channel.id in pics_only["channels"]:
@@ -119,37 +118,20 @@ class Bot(discord.ext.commands.Bot):
         for role in milestones["roles"]:
             if role in after_roles and role not in before_roles:
                 output_channel = discord.utils.get(after.guild.channels, name=milestones["roles"][role]["channel"])
-                await self.say(output_channel, context=after, parse=True, content=milestones["roles"][role]["message"])
+                await utils.say(output_channel, context=after, parse=True, content=milestones["roles"][role]["message"])
             
         return
 
-    # --- Utility methods ---
-    async def say(self, channel, context=None, parse=False, **kwargs):
-        """
-        Args:
-            channel(discord.abc.Messageable): The message's destination (e.g. TextChannel, DMChannel, etc.)
-            context(discord.ext.commands.Context): The original context of the message
-            **kwargs: Any arguments accepted by discord.Channel.send()
-        """
-        if parse and context:
-            content = kwargs.get("content")
-            embed = kwargs.get("embed")
-
-            if content:
-                kwargs["content"] = utils.substitute_text(content, context)
-            if embed:
-                if embed.title:
-                    embed.title = utils.substitute_text(embed.title, context)
-                if embed.description:
-                    embed.description = utils.substitute_text(embed.description, context)
-                if embed.footer:
-                    embed.footer.text = utils.substitute_text(embed.footer.text, context)
-                if embed.fields:
-                    for f in embed.fields:
-                        f.value = utils.substitute_text(f.value, context)
-                kwargs["embed"] = embed
-
-        return await channel.send(**kwargs)
+    async def on_command_error(self, context, error):
+        cmd_name = context.command.name
+        cmd_settings = Settings.command_settings(cmd_name, context.guild.id)
+        if isinstance(error, discord.ext.commands.MissingPermissions) and cmd_settings.get("visible"):
+            notice = "You need the following permissions for this command: {}".format(", ".join([f"`{p}`" for p in error.missing_perms]))
+            await utils.say(context.channel, content=notice)
+        elif isinstance(error, discord.ext.commands.NotOwner):
+            return
+        else:
+            Logger.error(logger, error)
 
     def set_commands(self, *cmds):
         self.add_cog(commands.Admin(self))
