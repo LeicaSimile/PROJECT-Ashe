@@ -51,8 +51,8 @@ loggers:
     handlers: []
 
   main.bot:
-    level: INFO
-    handlers: [console, info_file, error_file]
+    level: DEBUG
+    handlers: [console, debug_file, info_file, error_file]
 
   main.settings:
     level: DEBUG

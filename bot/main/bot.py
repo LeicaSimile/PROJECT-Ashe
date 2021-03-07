@@ -141,6 +141,19 @@ class Bot(discord.ext.commands.Bot):
         for c in cmds:
             self.add_cog(c)
 
+        for command in self.commands:
+            Logger.debug(logger, f"Setting up command '{command.name}'")
+            cmd_settings = Settings.command_settings(command.name)
+            if not cmd_settings:
+                continue
+
+            command.aliases = cmd_settings.get("aliases", [])
+            command.hidden = not cmd_settings.get("visible", True)
+            command.description = cmd_settings.get("description", "")
+            command.help = cmd_settings.get("help", "")
+            command.usage = cmd_settings.get("usage", "")
+            Logger.debug(logger, f"Command '{command.name}' all set")
+
     def set_events(self, *events):
         for e in events:
             self.event(e)

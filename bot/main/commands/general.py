@@ -17,9 +17,7 @@ class General(commands.Cog):
         """
         self.bot = bot
 
-    @commands.command(
-        description=Settings.command_settings("define").get("description"),
-        usage=Settings.command_settings("define").get("description"))
+    @commands.command()
     async def define(self, context):
         args = context.message.clean_content.split(maxsplit=1)
         if 2 > len(args):

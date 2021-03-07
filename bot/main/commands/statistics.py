@@ -42,11 +42,8 @@ class Statistics(commands.Cog):
         """
         self.bot = bot
 
-    @commands.command(
-        description=Settings.command_settings("wordcloud").get("description"),
-        usage=Settings.command_settings("wordcloud").get("usage"))
+    @commands.command()
     async def wordcloud(self, context):
-        arguments = context.message.content.split()
         messages = []
         channels = context.guild.text_channels
         now = datetime.datetime.now()

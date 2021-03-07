@@ -33,7 +33,7 @@ default:
         Paste the message ID when prompted, then enter the new message.
 
         To get the message ID, enable developer mode in Settings (Gear Icon) > Appearance > Advanced > Developer Mode.
-        
+
         (PC) Hover to the right of the message and click the three vertical dots > Copy ID.
         (Mobile) Tap and hold the message > Copy ID.
       timeout_id_prompt: 300

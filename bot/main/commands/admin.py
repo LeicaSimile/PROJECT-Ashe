@@ -145,7 +145,7 @@ class Admin(commands.Cog):
         await self.notify_members(context, members, message)
         return CommandStatus.COMPLETED
                 
-    @commands.command(description=Settings.command_settings("inactivelist").get("description"))
+    @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def inactivelist(self, context):
         cmd_settings = Settings.command_settings(context.command.name, context.guild.id)
@@ -173,7 +173,7 @@ class Admin(commands.Cog):
                 inactivity_message = Settings.inactive_message(context.guild.id)
                 if inactivity_message:
                     embed.set_footer(text="React 📧 below to notify them")
-                report = await utils.say(context.channel, content=f"{context.author.mention}", embed=report_embed)
+                report = await utils.say(context.channel, content=f"{context.author.mention}", embed=embed)
         
                 if inactivity_message:
                     await report.add_reaction("📧")
@@ -192,7 +192,7 @@ class Admin(commands.Cog):
         
         return CommandStatus.COMPLETED
 
-    @commands.command(description=Settings.command_settings("inactivenotify").get("description"))
+    @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def inactivenotify(self, context):
         cmd_settings = Settings.command_settings(context.command.name, context.guild.id)
@@ -217,10 +217,7 @@ class Admin(commands.Cog):
         elif cmd_type == "list":
             pass
 
-    @commands.command(
-        description=Settings.command_settings("message").get("description"),
-        usage=Settings.command_settings("message").get("usage")
-    )
+    @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def message(self, context):
         async def get_destination(context):
@@ -281,11 +278,7 @@ class Admin(commands.Cog):
         else:
             await utils.say(context.channel, content=f"Message sent: {sent.jump_url}")
 
-    @commands.command(
-        description=Settings.command_settings("edit").get("description"),
-        usage=Settings.command_settings("edit").get("usage"),
-        help=Settings.command_settings("edit").get("help")
-    )
+    @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def edit(self, context):
         def check_id(msg):
@@ -353,7 +346,7 @@ class Admin(commands.Cog):
 
         return CommandStatus.COMPLETED
 
-    @commands.command(description=Settings.command_settings("purgeleaderboard").get("description"))
+    @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def purgeleaderboard(self, context):
         cmd_settings = Settings.command_settings("purgeleaderboard", context.guild.id)
@@ -381,7 +374,7 @@ class Admin(commands.Cog):
         except mee6_py_api.exceptions.HTTPRequestError:
             await utils.say(context.channel, content="I couldn't find this server's MEE6 leaderboard.")
 
-    @commands.command(description=Settings.command_settings("shutdown").get("description"))
+    @commands.command()
     @commands.is_owner()
     async def shutdown(self, context):
         await self.bot.logout()
