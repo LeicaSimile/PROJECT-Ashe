@@ -72,7 +72,7 @@ class Settings(object):
     def server_features(cls, server_id, feature=""):
         """Returns event configuration for a given server (gives None if config doesn't exist)"""
         values = cls.config["features"]["servers"].get(server_id)
-        if feature:
+        if feature and values:
             values = values.get(feature)
         
         return values
