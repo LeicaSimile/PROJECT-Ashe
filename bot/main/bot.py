@@ -122,6 +122,9 @@ class Bot(discord.ext.commands.Bot):
             
         return
 
+    async def on_error(self, context, error):
+        Logger.error(logger, error)
+
     async def on_command_error(self, context, error):
         cmd_name = context.command.name
         cmd_settings = Settings.command_settings(cmd_name, context.guild.id)
