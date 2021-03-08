@@ -43,6 +43,20 @@ default:
       enabled: false
       visible: false
 
+    inactivelist:
+      enabled: true
+      visible: true
+      aliases:
+        - purgelist
+      description: Shows a list of inactive members in the server.
+
+    inactivenotify:
+      enabled: true
+      visible: true
+      aliases:
+        - purgenotify
+      description: Notifies all inactivelist members about their inactivity.
+
     message:
       enabled: true
       visible: true
@@ -53,16 +67,6 @@ default:
       enabled: true
       visible: true
       description: Get a list of members on the MEE6 leaderboard who are no longer on the server.
-
-    purgelist:
-      enabled: true
-      visible: true
-      description: Shows a list of inactive members in the server.
-
-    purgenotify:
-      enabled: true
-      visible: true
-      description: Notifies all purgelist members about their inactivity.
 
     shutdown:
       enabled: true
@@ -105,7 +109,7 @@ servers:
         enabled: true
         roles:
           533499454964105245:
-            name: 1
+            name: "1"
             channel: "general-chat"
             message: |-
               Welcome to the server, {mention}!
@@ -115,19 +119,19 @@ servers:
               If you have any questions, feel free to message a moderator or post in [#help-and-advice].
           
           533369804334039061:
-            name: 5
+            name: "5"
             channel: "general-chat"
             message: |-
               Congrats, {mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#serious-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels.
           
           533369912207474706:
-            name: 20
+            name: "20"
             channel: "general-chat"
             message: |-
               Congrats, {mention}! You unlocked the Test Lab. Check out [#signup] to become a server tester!
 
           655885436656549898:
-            name: 69
+            name: "69"
             channel: "general-chat"
             message: "{mention} Nice."
     

@@ -28,7 +28,6 @@ class Settings(object):
                 "client_id": os.environ.get("CLIENT_ID"),
                 "client_secret": os.environ.get("CLIENT_SECRET"),
                 "client_token": os.environ.get("CLIENT_TOKEN"),
-                "owner_id": os.environ.get("OWNER_ID"),
                 "dict_regular_api_key": os.environ.get("DICT_REGULAR_API_KEY"),
             }
         }
