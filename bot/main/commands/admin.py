@@ -107,7 +107,7 @@ class Admin(commands.Cog):
         failed = []
         for member in members:
             try:
-                await utils.say(member, content=message)
+                await utils.say(member, context=context, parse=True, content=message)
             except discord.DiscordException as e:
                 failed.append(member)
                 print(e)
