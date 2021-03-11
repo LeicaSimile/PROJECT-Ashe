@@ -147,15 +147,18 @@ class Settings(object):
     def inactive_message(cls, server_id):
         default_config = cls.default_features("inactivity")
         server_config = cls.server_features(server_id, "inactivity")
+        message_enabled = default_config["message_enabled"]
         if server_config:
-            if server_config.get("message_enabled",
-                default_config["message_enabled"]
-            ):
+            message_enabled = server_config.get("message_enabled", message_enabled)
+            
+        if message_enabled:
+            if server_config:
                 try:
                     return server_config["message"]
                 except KeyError:
                     Logger.debug(logger, f"'inactivity' config for server ID {server_id} is missing a setting for 'message'. Using default setting instead.")
-                    return default_config["message"]
+            
+            return default_config["message"]
         
         return None
 
