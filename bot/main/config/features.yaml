@@ -138,7 +138,7 @@ servers:
     inactivity:
       days_threshold: 14
       message: |-
-        Hello, you are about to be kicked for inactivity at ***{server}***. Don't worry though, you're welcome back anytime! Just message `{owner_user}#{owner_discriminator}` for an invite back.
+        Hello, you are about to be kicked for inactivity at ***{server}***. Don't worry though, you're welcome back anytime! Just message `{owner_name}#{owner_discriminator}` for an invite back.
         
         (If you were exempt by a moderator, please ignore this message.)
 

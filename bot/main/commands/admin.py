@@ -113,7 +113,7 @@ class Admin(commands.Cog):
                 print(e)
             else:
                 success.append(member)
-        
+
         if success:
             messaged = "\n".join([f"{m.mention} [{m.display_name}]" for m in success])
             report_embed = discord.Embed(
@@ -130,9 +130,6 @@ class Admin(commands.Cog):
             await utils.say(context.channel, content=f"Couldn't message the following inactive members:", embed=report_embed)
 
     async def notify_inactive_members(self, context, members=None):
-        if not await validate_access(context, context.message.author):
-            return CommandStatus.INVALID
-
         message = Settings.inactive_message(context.guild.id)
         if not message:
             await utils.say(context.channel, content="There is no inactivity message for this server.")
@@ -144,7 +141,7 @@ class Admin(commands.Cog):
         
         await self.notify_members(context, members, message)
         return CommandStatus.COMPLETED
-                
+
     @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def inactivelist(self, context):

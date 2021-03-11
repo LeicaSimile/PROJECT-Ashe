@@ -32,8 +32,12 @@ def split_messages(content):
 
 def substitute_text(text: str, context: discord.ext.commands.Context):
     server_name = "the server"
+    owner_name = "the server owner"
+    owner_discriminator = ""
     if hasattr(context, "guild"):
         server_name = context.guild.name
+        owner_name = context.guild.owner.name
+        owner_discriminator = context.guild.owner.discriminator
 
     channel_name = ""
     if hasattr(context, "channel"):
@@ -46,7 +50,9 @@ def substitute_text(text: str, context: discord.ext.commands.Context):
     substitutions = {
         "server": server_name,
         "channel": channel_name,
-        "mention": mention
+        "mention": mention,
+        "owner_name": owner_name,
+        "owner_discriminator": owner_discriminator
     }
     text = text.format(**substitutions)
     try:
