@@ -140,9 +140,15 @@ servers:
             message: "{mention} Nice."
     
     inactivity:
+      include_reactions: true
       message_invite_enabled: true
       message_invite_hours: 168
       message_invite_channel: 533372732176334861
+      message_enabled: true
+      message: |-
+        Hello, you are about to be kicked for inactivity at ***{server}***. Don't worry though, you're welcome back anytime! You can use the invite below to rejoin the server. If the link expires, message `{owner_name}#{owner_discriminator}` for another invite back.
+        
+        (If you were exempt by a moderator, please ignore this message.)
 
   662365002556243993:
     on_message:
@@ -165,9 +171,11 @@ servers:
               Greetings, {mention}. State thy intro in [#introductions] and declare thy titles in [#roles].
 
     inactivity:
+      include_reactions: true
       message_invite_enabled: true
       message_invite_hours: 168
       message_invite_channel: 662366496215007257
+      message_enabled: true
       message: |-
         Hey there, you've been marked as inactive on ***{server}***. If you're kicked, feel free to rejoin using the invite below!
         
