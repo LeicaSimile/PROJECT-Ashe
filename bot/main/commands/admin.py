@@ -43,7 +43,7 @@ async def get_inactive_members(context, progress_report=True):
 
                 if include_reactions:
                     for r in m.reactions:
-                        async for u in r.users:
+                        async for u in r.users():
                             if u not in senders:
                                 senders.append(u)
 
