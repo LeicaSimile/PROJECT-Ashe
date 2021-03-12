@@ -9,6 +9,10 @@ default:
     days_threshold: 14
     include_reactions: false
     message_enabled: true
+    message_invite_enabled: false
+    message_invite_hours: 24
+    message_invite_max_uses: 1
+    message_invite_reason: In case user returns from inactivity
     message: |-
       Hello, you've been marked as inactive on ***{server}***.
       
@@ -110,7 +114,10 @@ servers:
     inactivity:
       days_threshold: 14
       include_reactions: true
+      message_invite_enabled: true
+      message_invite_hours: 168
+      message_invite_channel: 533372732176334861
       message: |-
-        Hello, you are about to be kicked for inactivity at ***{server}***. Don't worry though, you're welcome back anytime! Just message `{owner_name}#{owner_discriminator}` for an invite back.
+        Hello, you are about to be kicked for inactivity at ***{server}***. Don't worry though, you're welcome back anytime! You can use the invite below to rejoin the server. If the link expires, message `{owner_name}#{owner_discriminator}` for another invite back.
         
         (If you were exempt by a moderator, please ignore this message.)

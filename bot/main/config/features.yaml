@@ -9,10 +9,14 @@ default:
     days_threshold: 14
     include_reactions: false
     message_enabled: true
+    message_invite_enabled: false
+    message_invite_hours: 24
+    message_invite_max_uses: 1
+    message_invite_reason: In case user returns from inactivity
     message: |-
-      Hello, you've been marked as inactive on ***{server}***.
+      Hello, you've been marked as inactive on ***{server}*** and may be kicked.
       
-      (Do not reply here. This is an automated message and any replies will be ignored)
+      (Do not reply here. This is an automated message)
 
   commands:
     define:
@@ -136,11 +140,9 @@ servers:
             message: "{mention} Nice."
     
     inactivity:
-      days_threshold: 14
-      message: |-
-        Hello, you are about to be kicked for inactivity at ***{server}***. Don't worry though, you're welcome back anytime! Just message `{owner_name}#{owner_discriminator}` for an invite back.
-        
-        (If you were exempt by a moderator, please ignore this message.)
+      message_invite_enabled: true
+      message_invite_hours: 168
+      message_invite_channel: 533372732176334861
 
   662365002556243993:
     on_message:
@@ -151,6 +153,7 @@ servers:
             id: 668184294983991316
           8:
             id: 662394541202079744
+
     on_member_update:
       role_message:
         enabled: true
@@ -160,7 +163,16 @@ servers:
             channel: "general-chat"
             message: |-
               Greetings, {mention}. State thy intro in [#introductions] and declare thy titles in [#roles].
-  
+
+    inactivity:
+      message_invite_enabled: true
+      message_invite_hours: 168
+      message_invite_channel: 662366496215007257
+      message: |-
+        Hey there, you've been marked as inactive on ***{server}***. If you're kicked, feel free to rejoin using the invite below!
+        
+        (Do not reply here. This is an automated message)
+
   670671037343727646:
     on_member_update:
       role_message:

@@ -116,6 +116,20 @@ class Settings(object):
                     server_settings[value] = default_settings[value]
 
         return server_settings
+
+    @classmethod
+    def inactivity_features(cls, server_id):
+        default_features = cls.default_features("inactivity")
+        server_features = cls.server_features(server_id, "inactivity")
+        if not server_features:
+            return None
+        
+        # Combine default settings with server settings if not present already
+        if default_features:
+            for value in [v for v in default_features if v not in server_features]:
+                server_features[value] = default_features[value]
+
+        return server_features
     
     @classmethod
     def command_settings(cls, command, server_id=None):

@@ -102,12 +102,39 @@ class Admin(commands.Cog):
         """
         self.bot = bot
 
-    async def notify_members(self, context, members, message):
+    async def notify_members(self, context, members, message, use_case=None):
         success = []
         failed = []
         for member in members:
+            notification = message
+
+            inactivity_settings = Settings.inactivity_features(context.guild.id)
+            if use_case == "inactivity" and inactivity_settings.get("message_invite_enabled"):
+                # Attach invite to message
+                invite_channel = None
+                invite_channel_id = inactivity_settings.get("message_invite_channel")
+                if invite_channel_id:
+                    invite_channel = context.guild.get_channel(invite_channel_id)
+                
+                if not invite_channel:
+                    invite_channel = context.guild.text_channels[0]
+
+                # Translate hours to seconds for max_age
+                max_age = 3600 * inactivity_settings.get("message_invite_hours")
+                max_uses = inactivity_settings.get("message_invite_max_uses")
+                reason = inactivity_settings.get("message_invite_reason")
+                
+                try:
+                    invite = await invite_channel.create_invite(max_age=max_age, max_uses=max_uses, reason=reason)
+                    notification = f"{notification}\n{invite.url}"
+                except discord.HTTPException as e:
+                    print(e)
+                    failed.append(member)
+                    await utils.say(context.channel, content=f"An error happened while creating invite: {e.text} (error code: {e.code})")
+                    break
+
             try:
-                await utils.say(member, context=context, parse=True, content=message)
+                await utils.say(member, context=context, parse=True, content=notification)
             except discord.DiscordException as e:
                 failed.append(member)
                 print(e)
@@ -139,7 +166,7 @@ class Admin(commands.Cog):
             members = await get_inactive_members(context)
         members = [i.user for i in members]
         
-        await self.notify_members(context, members, message)
+        await self.notify_members(context, members, message, use_case="inactivity")
         return CommandStatus.COMPLETED
 
     @commands.command()
