@@ -143,18 +143,18 @@ class Admin(commands.Cog):
 
         if success:
             messaged = "\n".join([f"{m.mention} [{m.display_name}]" for m in success])
-            report_embed = discord.Embed(
+            for embed in utils.split_embeds(
                 title="Notified Members",
                 description=messaged
-            )
-            await utils.say(context.channel, embed=report_embed)
+            ):
+                await utils.say(context.channel, embed=embed)
         if failed:
             not_messaged = "\n".join([f"{m.mention} [{m.display_name}]" for m in failed])
-            report_embed = discord.Embed(
+            for embed in utils.split_embeds(
                 title="Failed to Notify",
                 description=not_messaged
-            )
-            await utils.say(context.channel, content=f"Couldn't message the following inactive members:", embed=report_embed)
+            ):
+                await utils.say(context.channel, embed=embed)
 
     async def notify_inactive_members(self, context, members=None):
         message = Settings.inactive_message(context.guild.id)
@@ -381,19 +381,18 @@ class Admin(commands.Cog):
         member_ids = [str(m.id) for m in context.guild.members]
         try:
             leaderboard_pages = await mee6.levels.get_all_leaderboard_pages()
-            i = 1
+            absent_members = []
             for page in leaderboard_pages:
                 players = page.get("players")
-                absent_members = [f"**{p.get('username')}**#{p.get('discriminator')} — lv{p.get('level')}" for p in players if p.get("id") not in member_ids]
+                absent_members.extend([f"**{p.get('username')}**#{p.get('discriminator')} — lv{p.get('level')}" for p in players if p.get("id") not in member_ids])
                 if not absent_members:
                     continue
 
-                report = discord.Embed(
-                    title=f"MEE6 leaderboard members who left the server (p. {i})",
-                    description="\n".join(absent_members)
-                )
-                await utils.say(context.channel, embed=report)
-                i += 1
+            for embed in utils.split_embeds(
+                title=f"MEE6 leaderboard members who left the server",
+                description="\n".join(absent_members)
+            ):
+                await utils.say(context.channel, embed=embed)
 
         except mee6_py_api.exceptions.HTTPRequestError:
             await utils.say(context.channel, content="I couldn't find this server's MEE6 leaderboard.")

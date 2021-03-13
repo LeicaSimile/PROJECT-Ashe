@@ -12,18 +12,34 @@ def split_embeds(title: str, description: str, delimiter="\n", **kwargs):
     """
     embeds = []
     char_count = len(description)
-    pages = math.ceil((char_count * 1.0) / Settings.app_standards("embed")["description_limit"])
-    split_description = description.split(delimiter)
-    
-    starting_line = 0
-    for p in range(1, pages + 1):
-        ending_line = math.ceil((len(split_description) / pages) * p)
+    max_chars = Settings.app_standards("embed")["description_limit"]
+    current_count = 0
+
+    # Minimum length of description as percentage of max_chars (0 to 1)
+    # e.g. 0.5 = description length must be at least 50% of max_chars
+    min_threshold = 0.25
+
+    while current_count < char_count:
+        current_description = description[current_count:]
+        if len(current_description) > max_chars:
+            end = current_count + max_chars
+            current_description = description[current_count:end]
+            split_description = current_description.rsplit(delimiter, maxsplit=1)
+            if len(split_description) < 2 or len(split_description[0]) < (max_chars * min_threshold):
+                split_description = current_description.rsplit(maxsplit=1)
+                if len(split_description) > 1:
+                    current_count += 1
+            elif len(split_description) > 1:
+                current_count += len(delimiter)
+
+            current_description = split_description[0]
+        
+        current_count += len(current_description)
         embeds.append(discord.Embed(
             title=title,
-            description=delimiter.join(split_description[starting_line:ending_line]),
+            description=current_description,
             **kwargs
         ))
-        starting_line = ending_line
 
     return embeds
 
