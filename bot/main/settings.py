@@ -1,12 +1,13 @@
 import logging
 import os
-import yaml
 from pathlib import Path
+import yaml
 from main.logger import Logger
 
 logger = logging.getLogger(__name__)
 
-class Settings(object):
+class Settings():
+    """Class for accessing values from config files"""
     config = {}
 
     @staticmethod
@@ -33,10 +34,10 @@ class Settings(object):
         }
 
         app_environment = cls.config["env"]["environment"]
-        if "PROD" == app_environment:
+        if app_environment == "PROD":
             app_config_filename = "app.yaml"
             features_config_filename = "features.yaml"
-        elif "DEV" == app_environment:
+        elif app_environment == "DEV":
             app_config_filename = "app_dev.yaml"
             features_config_filename = "features_dev.yaml"
 
@@ -48,7 +49,7 @@ class Settings(object):
         values = cls.config["app"]["default"]
         if key:
             values = values.get(key)
-        
+
         return values
 
     @classmethod
@@ -56,7 +57,7 @@ class Settings(object):
         values = cls.config["app"]["standards"]
         if key:
             values = values.get(key)
-        
+
         return values
 
     @classmethod
@@ -65,7 +66,7 @@ class Settings(object):
         values = cls.config["features"]["default"]
         if feature:
             values = values.get(feature)
-        
+
         return values
 
     @classmethod
@@ -74,7 +75,7 @@ class Settings(object):
         values = cls.config["features"]["servers"].get(server_id)
         if feature and values:
             values = values.get(feature)
-        
+
         return values
 
     @classmethod
@@ -87,7 +88,7 @@ class Settings(object):
         server_settings = server_features.get(feature)
         if not server_settings:
             return None
-        
+
         # Combine default settings with server settings if not present already
         if default_features:
             default_settings = default_features.get(feature)
@@ -96,7 +97,7 @@ class Settings(object):
                     server_settings[value] = default_settings[value]
 
         return server_settings
-    
+
     @classmethod
     def on_member_update_features(cls, server_id, feature):
         default_features = cls.default_features("on_member_update")
@@ -107,7 +108,7 @@ class Settings(object):
         server_settings = server_features.get(feature)
         if not server_settings:
             return None
-        
+
         # Combine default settings with server settings if not present already
         if default_features:
             default_settings = default_features.get(feature)
@@ -118,20 +119,6 @@ class Settings(object):
         return server_settings
 
     @classmethod
-    def inactivity_features(cls, server_id):
-        default_features = cls.default_features("inactivity")
-        server_features = cls.server_features(server_id, "inactivity")
-        if not server_features:
-            return None
-        
-        # Combine default settings with server settings if not present already
-        if default_features:
-            for value in [v for v in default_features if v not in server_features]:
-                server_features[value] = default_features[value]
-
-        return server_features
-    
-    @classmethod
     def command_settings(cls, command, server_id=None):
         if server_id is not None:
             cmd_settings = cls.server_features(server_id, "commands")
@@ -139,59 +126,6 @@ class Settings(object):
                 return cmd_settings.get(command)
 
         return cls.default_features("commands").get(command)
-
-    @classmethod
-    def inactive_threshold(cls, server_id=None):
-        """Returns the minimum amount of days for a server member to be considered inactive."""
-        if server_id:
-            server_config = cls.server_features(server_id, "inactivity")
-            if server_config:
-                try:
-                    return server_config["days_threshold"]
-                except KeyError as err:
-                    Logger.debug(logger, f"'inactivity' config for server ID {server_id} is missing a setting for 'days_threshold'. Using default setting instead.")
-        
-        try:
-            return cls.default_features("inactivity")["days_threshold"]
-        except KeyError as err:
-            Logger.warn(logger, f"Missing a default setting for 'inactivity' feature: 'days_threshold'. {err}")
-            return 14
-
-    @classmethod
-    def inactive_message(cls, server_id):
-        default_config = cls.default_features("inactivity")
-        server_config = cls.server_features(server_id, "inactivity")
-        message_enabled = default_config["message_enabled"]
-        if server_config:
-            message_enabled = server_config.get("message_enabled", message_enabled)
-            
-        if message_enabled:
-            if server_config:
-                try:
-                    return server_config["message"]
-                except KeyError:
-                    Logger.debug(logger, f"'inactivity' config for server ID {server_id} is missing a setting for 'message'. Using default setting instead.")
-            
-            return default_config["message"]
-        
-        return None
-
-    @classmethod
-    def include_reactions_inactivity(cls, server_id=None):
-        if server_id:
-            server_config = cls.server_features(server_id, "inactivity")
-            if server_config:
-                try:
-                    return server_config["include_reactions"]
-                except KeyError as err:
-                    Logger.debug(logger, f"'inactivity' config for server ID {server_id} is missing a setting for 'include_reactions'. Using default setting instead.")
-        
-        try:
-            return cls.default_features("inactivity")["include_reactions"]
-        except KeyError as err:
-            Logger.warn(logger, f"Missing a default setting for 'inactivity: include_reactions'. {err}")
-        
-        return True
 
 
 # Read config files to set variables accordingly

@@ -1,40 +1,33 @@
 import asyncio
 import datetime
-import math
-import time
-import re
 
 import discord
 from discord.ext import commands
 import mee6_py_api
 
 from main import database, utils
+from main.errors import AppError, ErrorCode
 from main.settings import Settings
 from main.status import CommandStatus
-
-URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
-
-async def validate_access(context, user):
-    """Checks if user has permission to use command."""
-    return context.guild.owner.id == user.id \
-        or user.guild_permissions.administrator
+from . import admin_dao
 
 async def get_inactive_members(context, progress_report=True):
     """Returns a list of inactive members."""
     senders = []
     inactive_members = []
     now = datetime.datetime.now()
-    days_threshold = Settings.inactive_threshold(context.guild.id)
+    days_threshold = admin_dao.inactive_threshold(context.guild.id)
     time_boundary = now - datetime.timedelta(days=days_threshold)
-    progress_msg = None
-    include_reactions = Settings.include_reactions_inactivity(context.guild.id)
 
+    include_reactions = admin_dao.include_reactions_inactivity(context.guild.id)
     included_channels = context.guild.text_channels
+
+    progress_msg = None
     channel_count = len(included_channels)
 
     if progress_report:
         progress_msg = await utils.say(context.channel, content=f"Scanning {channel_count} channels for inactive members.")
-    
+
     for i, channel in enumerate(included_channels):
         try:
             async for m in channel.history(limit=None, after=(now - datetime.timedelta(days=days_threshold)), oldest_first=False):
@@ -52,15 +45,15 @@ async def get_inactive_members(context, progress_report=True):
         else:
             if progress_msg:
                 await progress_msg.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
-    
+
     if progress_msg:
         await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
-    
+
     results = [
         u for u in context.guild.members
         if u not in senders and u.joined_at < time_boundary and not u.bot
     ]
-    db_inactive_members = [] # database.get_all_inactive_members(context.guild.id)
+    db_inactive_members = [] # admin_dao.inactive_members(context.guild.id)
 
     for member in results:
         if member.id in db_inactive_members:
@@ -69,26 +62,18 @@ async def get_inactive_members(context, progress_report=True):
             inactive_members.append(m)
         else:
             inactive_members.append(database.InactiveMember(context.guild.id, member.id, user=member))
-    # update_inactive_members(db_inactive_members, {m.member_id: m for m in inactive_members})
+    # update_inactive_members(context.guild.id, {m.member_id: m for m in inactive_members})
 
     return inactive_members
 
-def update_inactive_members(before, after):
+def update_inactive_members(server_id: int, after):
     """
     Args:
-        before(dict): Collection of previously recorded inactive members {member_id: database.InactiveMember}.
+        server_id(int): Server's unique ID
         after(dict): Current collection of inactive members {member_id: database.InactiveMember}.
 
     """
-    for member in before:
-        if member not in after:
-            database.remove_inactive_member(before[member].guild_id, before[member].member_id)
-
-    for member in after:
-        if member not in before:
-            database.add_inactive_member(after[member].guild_id, after[member].member_id)
-
-    return
+    admin_dao.update_inactive_members(server_id, after)
 
 
 class Admin(commands.Cog):
@@ -102,36 +87,54 @@ class Admin(commands.Cog):
         """
         self.bot = bot
 
+    # --- Helper functions ---
+    async def inactivity_notification_invite(self, server: discord.Guild):
+        """Returns an Invite object for a given server's inactivity notifications"""
+        inactivity_settings = admin_dao.server_inactivity_settings(context.guild.id)
+        if not inactivity_settings:
+            raise AppError(
+                ErrorCode.ERR_FEATURE_NOT_FOUND,
+                "'inactivity' settings not found for server ID {context.guild.id}"
+            )
+        elif not inactivity_settings.get("message_invite_enabled"):
+            return None
+
+        # Attach invite to message
+        invite_channel = None
+        invite_channel_id = inactivity_settings.get("message_invite_channel")
+        if invite_channel_id:
+            invite_channel = server.get_channel(invite_channel_id)
+
+        if not invite_channel:
+            invite_channel = server.text_channels[0]
+
+        # Translate hours to seconds for max_age
+        max_age = 3600 * inactivity_settings.get("message_invite_hours", 0)
+        max_uses = inactivity_settings.get("message_invite_max_uses")
+        reason = inactivity_settings.get("message_invite_reason")
+
+        invite = await invite_channel.create_invite(max_age=max_age, max_uses=max_uses, reason=reason)
+        return invite
+
     async def notify_members(self, context, members, message, use_case=None):
         success = []
         failed = []
         for member in members:
             notification = message
 
-            inactivity_settings = Settings.inactivity_features(context.guild.id)
-            if use_case == "inactivity" and inactivity_settings.get("message_invite_enabled"):
-                # Attach invite to message
-                invite_channel = None
-                invite_channel_id = inactivity_settings.get("message_invite_channel")
-                if invite_channel_id:
-                    invite_channel = context.guild.get_channel(invite_channel_id)
-                
-                if not invite_channel:
-                    invite_channel = context.guild.text_channels[0]
-
-                # Translate hours to seconds for max_age
-                max_age = 3600 * inactivity_settings.get("message_invite_hours")
-                max_uses = inactivity_settings.get("message_invite_max_uses")
-                reason = inactivity_settings.get("message_invite_reason")
-                
+            if use_case == "inactivity":
                 try:
-                    invite = await invite_channel.create_invite(max_age=max_age, max_uses=max_uses, reason=reason)
-                    notification = f"{notification}\n{invite.url}"
+                    invite = await self.inactivity_notification_invite(context.guild)
+                    if invite:
+                        notification = f"{notification}\n{invite.url}"
                 except discord.HTTPException as e:
                     print(e)
                     failed.append(member)
                     await utils.say(context.channel, content=f"An error happened while creating invite: {e.text} (error code: {e.code})")
                     break
+                except AppError as e:
+                    await utils.say(context.channel, content=f"Stopped notifying members due to error:\n```{e}```")
+                    return
 
             try:
                 await utils.say(member, context=context, parse=True, content=notification)
@@ -154,10 +157,10 @@ class Admin(commands.Cog):
                 title="Failed to Notify",
                 description=not_messaged
             )
-            await utils.say(context.channel, content=f"Couldn't message the following inactive members:", embed=report_embed)
+            await utils.say(context.channel, content="Couldn't message the following inactive members:", embed=report_embed)
 
     async def notify_inactive_members(self, context, members=None):
-        message = Settings.inactive_message(context.guild.id)
+        message = admin_dao.inactive_message(context.guild.id)
         if not message:
             await utils.say(context.channel, content="There is no inactivity message for this server.")
             return CommandStatus.FAILED
@@ -169,6 +172,7 @@ class Admin(commands.Cog):
         await self.notify_members(context, members, message, use_case="inactivity")
         return CommandStatus.COMPLETED
 
+    # --- Commands ---
     @commands.command()
     @commands.has_guild_permissions(administrator=True)
     async def inactivelist(self, context):
@@ -183,7 +187,7 @@ class Admin(commands.Cog):
             entry = f"{'**EXEMPT** ' if i.is_exempt else ''}{i.user.mention} [{i.user.display_name}]{last_notified}"
             inactive_list.append(entry)
 
-        days_threshold = Settings.inactive_threshold(context.guild.id)
+        days_threshold = admin_dao.inactive_threshold(context.guild.id)
         embeds = utils.split_embeds(
             title=f"Inactive Members ({days_threshold}+ days since last message)",
             description="\n".join(inactive_list)
@@ -194,7 +198,7 @@ class Admin(commands.Cog):
                 await utils.say(context.channel, embed=embed)
             else:
                 # Final message
-                inactivity_message = Settings.inactive_message(context.guild.id)
+                inactivity_message = admin_dao.inactive_message(context.guild.id)
                 if inactivity_message:
                     embed.set_footer(text="React 📧 below to notify them")
                 report = await utils.say(context.channel, content=f"{context.author.mention}", embed=embed)
