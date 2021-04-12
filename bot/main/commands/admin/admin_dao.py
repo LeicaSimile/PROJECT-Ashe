@@ -1,3 +1,5 @@
+"""Methods for accessing data related to admin features."""
+import logging
 import discord
 from main.settings import Settings
 from main.logger import Logger

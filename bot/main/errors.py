@@ -1,3 +1,5 @@
+"""Custom error classes for PROJECT Ashe"""
+
 class AppError(Exception):
     def __init__(self, code, message=""):
         if not isinstance(code, ErrorCode):

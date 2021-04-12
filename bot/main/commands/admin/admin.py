@@ -1,15 +1,21 @@
+"""Admin commands"""
 import asyncio
 import datetime
+import logging
 
 import discord
 from discord.ext import commands
 import mee6_py_api
 
 from main import database, utils
+from main.logger import Logger
 from main.errors import AppError, ErrorCode
 from main.settings import Settings
 from main.status import CommandStatus
 from . import admin_dao
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARN)
 
 async def get_inactive_members(context, progress_report=True):
     """Returns a list of inactive members."""
@@ -41,7 +47,7 @@ async def get_inactive_members(context, progress_report=True):
                                 senders.append(u)
 
         except discord.errors.Forbidden:
-            print(f"Can't access {channel.name}")
+            Logger.error(logger, f"Can't access {channel.name}")
         else:
             if progress_msg:
                 await progress_msg.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
@@ -90,7 +96,7 @@ class Admin(commands.Cog):
     # --- Helper functions ---
     async def inactivity_notification_invite(self, server: discord.Guild):
         """Returns an Invite object for a given server's inactivity notifications"""
-        inactivity_settings = admin_dao.server_inactivity_settings(context.guild.id)
+        inactivity_settings = admin_dao.server_inactivity_settings(server.id)
         if not inactivity_settings:
             raise AppError(
                 ErrorCode.ERR_FEATURE_NOT_FOUND,
@@ -128,9 +134,10 @@ class Admin(commands.Cog):
                     if invite:
                         notification = f"{notification}\n{invite.url}"
                 except discord.HTTPException as e:
-                    print(e)
                     failed.append(member)
-                    await utils.say(context.channel, content=f"An error happened while creating invite: {e.text} (error code: {e.code})")
+                    Logger.error(logger, e)
+                    error_message = f"An error happened while creating invite: {e.text} (error code: {e.code})"
+                    await utils.say(context.channel, content=error_message)
                     break
                 except AppError as e:
                     await utils.say(context.channel, content=f"Stopped notifying members due to error:\n```{e}```")
@@ -140,7 +147,7 @@ class Admin(commands.Cog):
                 await utils.say(member, context=context, parse=True, content=notification)
             except discord.DiscordException as e:
                 failed.append(member)
-                print(e)
+                Logger.error(e)
             else:
                 success.append(member)
 
