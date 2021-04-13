@@ -1,3 +1,4 @@
+"""General commands"""
 import re
 import discord
 from discord.ext import commands
@@ -5,6 +6,7 @@ from requests.utils import requote_uri
 
 from main.settings import Settings
 from main import utils
+from . import dictionary
 
 class General(commands.Cog):
     """General purpose commands."""
@@ -13,19 +15,24 @@ class General(commands.Cog):
         """
         Args:
             bot(Bot): Bot instance.
-            
+
         """
         self.bot = bot
 
     @commands.command()
     async def define(self, context):
+        """Get dictionary entry of a given term"""
         args = context.message.clean_content.split(maxsplit=1)
-        if 2 > len(args):
-            await utils.say(context.channel, content=f"Type `{context.prefix}{context.command.name} {context.command.usage}` to look up a term in the dictionary.")
+        if len(args) < 2:
+            prefix = context.prefix
+            command_name = context.command.name
+            command_usage = context.command.usage
+            hint = f"Type `{prefix}{command_name} {command_usage}` to look up a term in the dictionary."
+            await utils.say(context.channel, content=hint)
             return
 
         search_term = re.sub(r"\s+", " ", args[1].strip())
-        search_results = utils.dictionary.regular_lookup(search_term)
+        search_results = dictionary.regular_lookup(search_term)
 
         if search_results:
             base_url = Settings.command_settings("define")["base_url"]
@@ -46,7 +53,7 @@ class General(commands.Cog):
                         "*", "\n\n".join(entry.short_definitions), "*"
                     ]))
                     definitions.append("\n")
-                
+
                 reply.description = "\n".join(definitions)
             except AttributeError:
                 # Suggested search terms
