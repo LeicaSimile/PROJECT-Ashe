@@ -191,3 +191,11 @@ servers:
             channel: "general-chat"
             message: |-
               Welcome to {server}, {mention}! Grab some [#roles] and have fun.
+
+  837775661388005376:
+    on_message:
+      mee6_level_up:
+        enabled: true
+        roles:
+          4:
+            id: 837820517346967562
