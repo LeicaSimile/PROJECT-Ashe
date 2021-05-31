@@ -136,6 +136,10 @@ class Admin(commands.Cog):
         """Sends a notice to a list of members."""
         success = []
         failed = []
+        notify_progress_report = await utils.say(
+            context.channel, content=f"Notifying {len(members)} members..."
+        )
+
         for member in members:
             notification = message
 
