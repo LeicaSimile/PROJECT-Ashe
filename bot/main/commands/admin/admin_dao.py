@@ -1,10 +1,12 @@
 """Methods for accessing data related to admin features."""
+import datetime
 import logging
 import discord
 from main.settings import Settings
 from main.logger import Logger
 
 logger = logging.getLogger(__name__)
+
 
 def server_inactivity_settings(server_id):
     """Returns a server's inactivity configuration"""
@@ -55,9 +57,9 @@ def inactive_message(server_id):
     
     return None
 
-def include_reactions_inactivity(cls, server_id=None):
+def include_reactions_inactivity(server_id=None):
     if server_id:
-        server_config = cls.server_features(server_id, "inactivity")
+        server_config = Settings.server_features(server_id, "inactivity")
         if server_config:
             try:
                 return server_config["include_reactions"]
@@ -65,7 +67,7 @@ def include_reactions_inactivity(cls, server_id=None):
                 Logger.debug(logger, f"'inactivity' config for server ID {server_id} is missing a setting for 'include_reactions'. Using default setting instead.")
     
     try:
-        return cls.default_features("inactivity")["include_reactions"]
+        return Settings.default_features("inactivity")["include_reactions"]
     except KeyError as err:
         Logger.warn(logger, f"Missing a default setting for 'inactivity: include_reactions'. {err}")
     
@@ -73,9 +75,6 @@ def include_reactions_inactivity(cls, server_id=None):
 
 def inactivelist_channels(server: discord.Guild):
     return server.text_channels
-
-def inactive_members(server_id: int):
-    pass
 
 def update_inactive_members(server_id: int, new_inactive_members):
     pass

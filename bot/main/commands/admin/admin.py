@@ -12,55 +12,62 @@ from main.logger import Logger
 from main.errors import AppError, ErrorCode
 from main.settings import Settings
 from main.status import CommandStatus
-from . import admin_dao
+from . import admin_dao, admin_utils
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARN)
 
 async def get_inactive_members(context, progress_report=True):
     """Returns a list of inactive members."""
-    senders = []
-    inactive_members = []
-    now = datetime.datetime.now()
-    days_threshold = admin_dao.inactive_threshold(context.guild.id)
-    time_boundary = now - datetime.timedelta(days=days_threshold)
-
-    include_reactions = admin_dao.include_reactions_inactivity(context.guild.id)
-    included_channels = context.guild.text_channels
-
     progress_msg = None
+    included_channels = admin_dao.inactivelist_channels(context.guild)
+    active_members = []
+    inactive_members = []
+    current_channel = None
+    current_channel_index = 0
     channel_count = len(included_channels)
+    channel_progress_stats = ""
+    channel_count_message = ""
+    current_channel_progress_message = ""
 
     if progress_report:
-        progress_content = f"Scanning {channel_count} channels for inactive members."
+        progress_content = f"Scanning {channel_count} channels for inactive members..."
         progress_msg = await utils.say(context.channel, content=progress_content)
 
-    for i, channel in enumerate(included_channels):
-        try:
-            async for message in channel.history(
-                limit=None, after=(now - datetime.timedelta(days=days_threshold)), oldest_first=False
-            ):
-                if message.author not in senders:
-                    senders.append(message.author)
-
-                if include_reactions:
-                    for react in message.reactions:
-                        async for user in react.users():
-                            if user not in senders:
-                                senders.append(user)
-
-        except discord.errors.Forbidden:
+    async for scan in admin_utils.scan_active_members(context.guild):
+        if isinstance(scan.error, discord.errors.Forbidden):
             Logger.error(logger, f"Can't access {channel.name}")
+            # TODO: Edit progress_msg to indicate channel can't be accessed
         else:
-            if progress_msg:
-                await progress_msg.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
+            # Update channel index
+            if current_channel != scan.current_channel:
+                current_channel_index += 1
+                current_channel = scan.current_channel
+                channel_count_message = (
+                    f"Scanning {current_channel_index}/{channel_count} channels for inactive members..."
+                )
+
+            update_interval = 100
+            if progress_msg and not scan.current_channel_messages_scanned % update_interval:
+                channel_progress_stats = (
+                    f"\nMessages scanned: {scan.current_channel_messages_scanned}"
+                    f"\n\nDate: {scan.message_time}"
+                )
+
+            current_channel_progress_message = (
+                f"{channel_count_message}```Current channel: #{current_channel.name}{channel_progress_stats}```"
+            )
+            if progress_msg.content != current_channel_progress_message:
+                await progress_msg.edit(content=current_channel_progress_message)
+
+            active_members = scan.active_members
 
     if progress_msg:
         await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
 
     results = [
         user for user in context.guild.members
-        if user not in senders and user.joined_at < time_boundary and not user.bot
+        if user not in active_members and user.joined_at < time_boundary and not user.bot
     ]
     db_inactive_members = [] # admin_dao.inactive_members(context.guild.id)
 
