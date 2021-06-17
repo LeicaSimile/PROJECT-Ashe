@@ -1,8 +1,10 @@
+"""Interface for getting dictionary entries"""
 import re
 import requests
 from main.settings import Settings
 
 class DictionaryEntry():
+    """Contains a dictionary entry's data."""
     def __init__(self, data: dict):
         self._raw_data = data
         self.is_offensive = False
@@ -17,6 +19,7 @@ class DictionaryEntry():
         self.term_type = self._raw_data.get("fl")
 
 class DictionaryCache():
+    """Cache for storing dictionary entries fetched from the API."""
     def __init__(self, limit=1000):
         self._cache = {}
         self.limit = limit
@@ -33,7 +36,7 @@ class DictionaryCache():
         if word in self._cache:
             self._cache[word]["requests"] += 1
             return self._cache[word]["entries"]
-        
+
         return []
 
     def _check_entries(self):
@@ -59,7 +62,7 @@ def format_text(text: str):
 
 def regular_lookup(word: str):
     """Looks up given word in Merriam-Webster Collegiate dictionary
-    
+
     Args:
         word(str): Word to look up in dictionary.
 
@@ -96,9 +99,9 @@ def regular_lookup(word: str):
                             entries.append(variant)
                     else:
                         entries.append(DictionaryEntry(entry))
-                except (IndexError, KeyError) as e:
+                except (IndexError, KeyError):
                     continue
-            elif 0 == i and not entries:
+            elif i == 0 and not entries:
                 try:
                     # Check for spelling variants
                     if not entry.get("shortdef") and entry.get("cxs"):
@@ -113,5 +116,5 @@ def regular_lookup(word: str):
                 entries.append(DictionaryEntry(entry))
 
         regular_cache.add_entries(word, entries)
-    
+
     return entries

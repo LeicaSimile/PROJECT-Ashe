@@ -117,22 +117,28 @@ servers:
             channel: "general-chat"
             message: |-
               Welcome to the server, {mention}!
-              - Tag your interests and unlock different areas at [#choose-roles]
+              - Tag your interests and unlock different areas at [#roles]
               - Check out [#server-guide]
               
-              If you have any questions, feel free to message a moderator or post in [#help-and-advice].
+              If you have any questions, message a moderator or reach out to us at [#server-help]!
           
           533369804334039061:
             name: "5"
             channel: "general-chat"
             message: |-
-              Congrats, {mention}! You unlocked the [#server-portal] and the Second Floor. Check out [#serious-discussion], [#venting], and more! You can grab the NSFW role in [#choose-roles] to access the NSFW channels.
+              Congrats, {mention}! Check out our server [#partnership] and the Second Floor (see [#serious-discussion], [#venting], and more)! You can grab the NSFW role in [#roles] to access the NSFW channels.
           
+          533369803965071381:
+            name: "10"
+            channel: "general-chat"
+            message: |-
+              Congrats, {mention}! Check out the `NSFW Serious` role in [#roles] to access [#nsfw-serious].
+
           533369912207474706:
             name: "20"
             channel: "general-chat"
             message: |-
-              Congrats, {mention}! You unlocked the Test Lab. Check out [#signup] to become a server tester!
+              Congrats, {mention}! Check out the `Test Lab` role in [#roles] to become a server tester!
 
           655885436656549898:
             name: "69"
@@ -191,3 +197,11 @@ servers:
             channel: "general-chat"
             message: |-
               Welcome to {server}, {mention}! Grab some [#roles] and have fun.
+
+  837775661388005376:
+    on_message:
+      mee6_level_up:
+        enabled: true
+        roles:
+          4:
+            id: 837820517346967562
