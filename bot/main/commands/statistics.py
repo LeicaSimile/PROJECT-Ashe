@@ -90,5 +90,5 @@ class Statistics(commands.Cog):
         wc.to_file(wc_filepath)
 
         await report.delete()
-        await utils.say(context.channel, content=f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
+        await utils.say(context.channel, content=f"{context.author.mention} A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
         return CommandStatus.COMPLETED
