@@ -73,22 +73,24 @@ class Statistics(commands.Cog):
             except discord.errors.Forbidden:
                 print(f"Can't access {channel.name}")
         
-        if "picture provided" == "":
-            img_mask = imread("wordcloud/mask.png")
-            wc = WordCloud(background_color=None, mask=img_mask, contour_width=2, contour_color="white")
+        if messages:
+            if "picture provided" == "":
+                img_mask = imread("wordcloud/mask.png")
+                wc = WordCloud(background_color=None, mask=img_mask, contour_width=2, contour_color="white")
+            else:
+                wc = WordCloud(width=1000, height=400, max_words=500)
+
+            frequencies = get_word_frequencies(" ".join(messages))
+            wc.generate_from_frequencies(frequencies)
+            
+            wc_dir = f"wordcloud/{context.message.guild.id}"
+            os.makedirs(wc_dir, exist_ok=True)
+
+            wc_filename = f"{now:%Y%m%d%H%M%S}.png"
+            wc_filepath = os.path.join(wc_dir, wc_filename)
+            wc.to_file(wc_filepath)
+
+            await report.delete()
+            await utils.say(context.channel, content=f"{context.author.mention} A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
         else:
-            wc = WordCloud(width=1000, height=400, max_words=500)
-
-        frequencies = get_word_frequencies(" ".join(messages))
-        wc.generate_from_frequencies(frequencies)
-        
-        wc_dir = f"wordcloud/{context.message.guild.id}"
-        os.makedirs(wc_dir, exist_ok=True)
-
-        wc_filename = f"{now:%Y%m%d%H%M%S}.png"
-        wc_filepath = os.path.join(wc_dir, wc_filename)
-        wc.to_file(wc_filepath)
-
-        await report.delete()
-        await utils.say(context.channel, content=f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
-        return CommandStatus.COMPLETED
+            await utils.say(context.channel, content=f"{context.author.mention} No words found from {subject} in the past {days} days.")

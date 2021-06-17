@@ -2,6 +2,7 @@ settings.ini
 database/
 log/
 bot/logs/
+bot/wordcloud/
 local/
 
 env/
