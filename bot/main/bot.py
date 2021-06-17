@@ -31,10 +31,7 @@ class Bot(discord.ext.commands.Bot):
 
     # --- Events ---
     async def on_ready(self):
-        prefix = Settings.app_defaults("cmd_prefix")
         Logger.info(logger, f"{self.user.name} (ID: {self.user.id}) is now online.")
-        status = Settings.app_defaults("status").format(prefix=prefix)
-        await self.change_presence(activity=discord.Game(name=status))
 
     async def on_message(self, message):
         async def check_content(message, check, custom_message):
