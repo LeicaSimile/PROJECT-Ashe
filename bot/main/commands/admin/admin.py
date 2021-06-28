@@ -30,11 +30,15 @@ async def get_inactive_members(context, progress_report=True):
     channel_count_message = ""
     current_channel_progress_message = ""
 
+    now = datetime.datetime.now()
+    days_threshold = admin_dao.inactive_threshold(context.guild.id)
+    time_boundary = now - datetime.timedelta(days=days_threshold)
+
     if progress_report:
         progress_content = f"Scanning {channel_count} channels for inactive members..."
         progress_msg = await utils.say(context.channel, content=progress_content)
 
-    async for scan in admin_utils.scan_active_members(context.guild):
+    async for scan in admin_utils.scan_active_members(context.guild, time_boundary):
         if isinstance(scan.error, discord.errors.Forbidden):
             Logger.error(logger, f"Can't access {channel.name}")
             # TODO: Edit progress_msg to indicate channel can't be accessed

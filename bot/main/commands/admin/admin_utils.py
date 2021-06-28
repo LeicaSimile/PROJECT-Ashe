@@ -27,11 +27,12 @@ class ActivityScan():
         return ""
 
 
-async def scan_active_members(server: discord.Guild):
+async def scan_active_members(server: discord.Guild, time_boundary: datetime.Date):
     """Yields a list of active members.
     
     Args:
         server (discord.Guild): Guild object
+        time_boundary (date)
 
     Yields:
         list: If successful, yields list of active members (discord.Member) found so far by the scan.
@@ -39,10 +40,6 @@ async def scan_active_members(server: discord.Guild):
 
     """
     current_scan = ActivityScan()
-    now = datetime.datetime.now()
-    days_threshold = admin_dao.inactive_threshold(server.id)
-    time_boundary = now - datetime.timedelta(days=days_threshold)
-
     include_reactions = admin_dao.include_reactions_inactivity(server.id)
     included_channels = admin_dao.inactivelist_channels(server)
 
@@ -53,7 +50,7 @@ async def scan_active_members(server: discord.Guild):
 
             async for message in channel.history(
                 limit=None,
-                after=(now - datetime.timedelta(days=days_threshold)),
+                after=time_boundary,
                 oldest_first=True
              ):
                 current_scan.error = None
