@@ -27,7 +27,7 @@ class ActivityScan():
         return ""
 
 
-async def scan_active_members(server: discord.Guild, time_boundary: datetime.Date):
+async def scan_active_members(server: discord.Guild, time_boundary):
     """Yields a list of active members.
     
     Args:
