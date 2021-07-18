@@ -118,7 +118,7 @@ servers:
             message: |-
               Welcome to the server, {mention}!
               - Tag your interests and unlock different areas at [#roles]
-              - Check out [#server-guide]
+              - Check out [#starting-guide]
               
               If you have any questions, message a moderator or reach out to us at [#server-help]!
           
