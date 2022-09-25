@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class Settings():
     """Class for accessing values from config files"""
     config = None
-    PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+    PROJECT_ROOT = Path(__file__).parent.resolve()
 
     @staticmethod
     def load_config(filename):
