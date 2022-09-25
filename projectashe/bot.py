@@ -6,11 +6,11 @@ import discord
 import yaml
 from pathlib import Path
 
-from main import commands
-from main import utils
-from main import database
-from main.logger import Logger
-from main.settings import Settings
+from projectashe import commands
+from projectashe import utils
+from projectashe import database
+from projectashe.logger import Logger
+from projectashe.settings import Settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

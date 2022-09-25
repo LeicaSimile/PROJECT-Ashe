@@ -2,8 +2,8 @@
 import datetime
 import logging
 import discord
-from main.settings import Settings
-from main.logger import Logger
+from projectashe.settings import Settings
+from projectashe.logger import Logger
 
 logger = logging.getLogger(__name__)
 

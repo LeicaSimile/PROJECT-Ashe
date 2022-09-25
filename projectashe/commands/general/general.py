@@ -4,8 +4,8 @@ import discord
 from discord.ext import commands
 from requests.utils import requote_uri
 
-from main.settings import Settings
-from main import utils
+from projectashe.settings import Settings
+from projectashe import utils
 from . import dictionary
 
 class General(commands.Cog):

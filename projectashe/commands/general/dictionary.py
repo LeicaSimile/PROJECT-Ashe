@@ -1,7 +1,7 @@
 """Interface for getting dictionary entries"""
 import re
 import requests
-from main.settings import Settings
+from projectashe.settings import Settings
 
 class DictionaryEntry():
     """Contains a dictionary entry's data."""

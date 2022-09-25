@@ -1,9 +1,9 @@
 import yaml
 from pathlib import Path
-#from main import database
+#from projectashe import database
 
 events_config = None
-with open(Path(__file__).parent.joinpath("main/config/events.yaml"), "r") as f:
+with open(Path(__file__).parent.joinpath("config/events.yaml"), "r") as f:
     events_config = yaml.safe_load(f.read())
 
 message = r"{server}"

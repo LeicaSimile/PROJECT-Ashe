@@ -2,7 +2,7 @@
 import math
 import re
 import discord
-from main.settings import Settings
+from projectashe.settings import Settings
 
 def split_embeds(title: str, description: str, delimiter="\n", **kwargs):
     """Returns a list of embeds split according to Discord character limits.

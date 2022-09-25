@@ -6,8 +6,8 @@ import os
 import yaml
 import discord
 from pathlib import Path
-from main.settings import Settings
-from main.bot import Bot
+from projectashe.settings import Settings
+from projectashe.bot import Bot
 
 try:
     os.makedirs("logs")
@@ -27,5 +27,5 @@ def main():
     ashe.run()
 
 
-if "__main__" == __name__:
+if __name__ == "__main__":
     main()

@@ -14,7 +14,7 @@ from typing import Any, Iterable, Optional
 import discord
 from discord.ext.commands import Context
 
-from main.bot import Bot
+from projectashe.bot import Bot
 
 
 def async_test(wrapped):

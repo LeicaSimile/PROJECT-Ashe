@@ -7,11 +7,11 @@ import discord
 from discord.ext import commands
 import mee6_py_api
 
-from main import database, utils
-from main.logger import Logger
-from main.errors import AppError, ErrorCode
-from main.settings import Settings
-from main.status import CommandStatus
+from projectashe import database, utils
+from projectashe.logger import Logger
+from projectashe.errors import AppError, ErrorCode
+from projectashe.settings import Settings
+from projectashe.status import CommandStatus
 from . import admin_dao, admin_utils
 
 logger = logging.getLogger(__name__)

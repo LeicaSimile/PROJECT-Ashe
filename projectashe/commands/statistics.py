@@ -10,9 +10,9 @@ from wordcloud import WordCloud
 from matplotlib.image import imread
 from spacy.lang.en.stop_words import STOP_WORDS
 
-from main import utils
-from main.settings import Settings
-from main.status import CommandStatus
+from projectashe import utils
+from projectashe.settings import Settings
+from projectashe.status import CommandStatus
 
 def get_word_frequencies(text):
     fullTermsDict = multidict.MultiDict()

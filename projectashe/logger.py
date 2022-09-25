@@ -3,6 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
 class Logger(object):
     @classmethod
     def debug(cls, log_object, msg, *args, **kwargs):

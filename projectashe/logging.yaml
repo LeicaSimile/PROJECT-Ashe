@@ -50,14 +50,14 @@ loggers:
     level: WARN
     handlers: []
 
-  main.bot:
+  projectashe.bot:
     level: DEBUG
     handlers: [console, debug_file, info_file, error_file]
 
-  main.settings:
+  projectashe.settings:
     level: DEBUG
     handlers: [debug_file, error_file]
 
-  main.utils.logger:
+  projectashe.utils.logger:
     level: DEBUG
     handlers: [debug_file, error_file]

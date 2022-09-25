@@ -2,13 +2,15 @@ import logging
 import os
 from pathlib import Path
 import yaml
-from main.logger import Logger
+from projectashe.logger import Logger
 
 logger = logging.getLogger(__name__)
 
+
 class Settings():
     """Class for accessing values from config files"""
-    config = {}
+    config = None
+    PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 
     @staticmethod
     def load_config(filename):
@@ -129,4 +131,5 @@ class Settings():
 
 
 # Read config files to set variables accordingly
-Settings.load_all()
+if Settings.config is None:
+    Settings.load_all()
