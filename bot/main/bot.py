@@ -8,7 +8,7 @@ from pathlib import Path
 
 from main import commands
 from main import utils
-from main import database
+#from main import database
 from main.logger import Logger
 from main.settings import Settings
 
@@ -17,7 +17,7 @@ logger.setLevel(logging.INFO)
 
 class Bot(discord.ext.commands.Bot):
     def run(self):
-        database.setup()
+        #database.setup()
 
         events = [
             self.on_ready,
